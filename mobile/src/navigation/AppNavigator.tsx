@@ -39,6 +39,7 @@ import { ProfileScreen } from "../screens/home/ProfileScreen";
 import { NotificationsScreen } from "../screens/home/NotificationsScreen";
 import { SymptomAnalysisScreen } from "../screens/home/SymptomAnalysisScreen";
 import { CrossReactivityScreen } from "../screens/home/CrossReactivityScreen";
+import BarcodeScannerScreen from "../screens/home/BarcodeScannerScreen";
 
 // Type definitions
 export type RootStackParamList = {
@@ -67,16 +68,8 @@ export type MainTabParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// Placeholder for Scan screen
-function ScanScreen() {
-  const { theme } = useTheme();
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.background }}>
-      <Ionicons name="camera" size={64} color={theme.textSecondary} />
-      <Text style={{ color: theme.textSecondary, marginTop: 16, fontSize: 18 }}>Scan Coming Soon</Text>
-    </View>
-  );
-}
+// Using BarcodeScannerScreen
+const ScanScreen = BarcodeScannerScreen;
 
 // Home Screen wrapper with navigation
 function HomeScreenWrapper({ userName }: { userName: string }) {
@@ -137,7 +130,7 @@ function MainTabNavigator({ route }: { route: { params: { userName: string } } }
         {() => <HomeScreenWrapper userName={userName} />}
       </Tab.Screen>
       <Tab.Screen name="MealLog">
-        {({ navigation }) => <MealLogScreen onBack={() => navigation.navigate("Home")} />}
+      {({ navigation, route }) => <MealLogScreen onBack={() => navigation.navigate("Home")} route={route} />}
       </Tab.Screen>
       <Tab.Screen name="Scan" component={ScanScreen} />
       <Tab.Screen name="Library">

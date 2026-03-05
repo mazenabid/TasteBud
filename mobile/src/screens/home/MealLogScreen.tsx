@@ -26,6 +26,15 @@ import { mealLogService } from "../../services/mealLogService";
 
 interface MealLogScreenProps {
   onBack: () => void;
+  route?: {
+    params?: {
+      prefillMeal?: {
+        name: string;
+        ingredientIds: string[];
+        ingredientNames: string[];
+      };
+    };
+  };
 }
 
 interface Meal {
@@ -47,7 +56,7 @@ interface DayLog {
   isExpanded: boolean;
 }
 
-export function MealLogScreen({ onBack }: MealLogScreenProps) {
+export function MealLogScreen({ onBack, route }: MealLogScreenProps) {
   const { theme, isDark } = useTheme();
 
   const currentDate = new Date();
@@ -95,6 +104,16 @@ export function MealLogScreen({ onBack }: MealLogScreenProps) {
       setDayLogs(fetchedLogs);
     }
   }, [fetchedLogs]);
+
+  useEffect(() => {
+    if (route?.params?.prefillMeal) {
+      const { name, ingredientIds, ingredientNames } = route.params.prefillMeal;
+      setMealName(name);
+      setIngredients(ingredientNames);
+      setIngredientId(ingredientIds);
+      setIsAddingMeal(true);
+    }
+  }, [route?.params?.prefillMeal]);
 
   const toggleDay = (index: number) => {
     setDayLogs(

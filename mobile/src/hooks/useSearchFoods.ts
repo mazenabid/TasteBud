@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ingredientsService } from "../services/ingredientsService";
 import { brandedFoodService } from "../services/brandedFoodService";
 
@@ -32,7 +32,7 @@ export interface CombinedSearchResults {
 }
 
 const PAGE_SIZE = 10;
-
+const DEBOUNCE_MS = 350;
 
 export function useSearchFoods(query: string): CombinedSearchResults {
   const [ingredients, setIngredients] = useState<IngredientResult[]>([]);
@@ -42,21 +42,32 @@ export function useSearchFoods(query: string): CombinedSearchResults {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
+  const requestIdRef = useRef(0);
+  const ingredientsRef = useRef(ingredients);
+  const brandedRef = useRef(brandedFoods);
+
+  ingredientsRef.current = ingredients;
+  brandedRef.current = brandedFoods;
+
   useEffect(() => {
+    if (!query.trim() || query.length < 2) {
+      setIngredients([]);
+      setBrandedFoods([]);
+      setIngredientsTotal(0);
+      setBrandedTotal(0);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const currentRequestId = ++requestIdRef.current;
+
     const timeout = setTimeout(async () => {
-      if (!query.trim() || query.length < 2) {
-        setIngredients([]);
-        setBrandedFoods([]);
-        setIngredientsTotal(0);
-        setBrandedTotal(0);
-        return;
-      }
-
-      setLoading(true);
-
       try {
         const res = await ingredientsService.search(query, PAGE_SIZE);
-        
+
+        if (currentRequestId !== requestIdRef.current) return;
+
         if (res.status === 200 && res.data) {
           if (res.data.ingredients !== undefined && res.data.branded !== undefined) {
             setIngredients(
@@ -67,7 +78,6 @@ export function useSearchFoods(query: string): CombinedSearchResults {
                 type: "ingredient" as const,
               }))
             );
-            
             setBrandedFoods(
               res.data.branded.map((item: any) => ({
                 _id: item._id,
@@ -78,30 +88,29 @@ export function useSearchFoods(query: string): CombinedSearchResults {
                 type: "branded" as const,
               }))
             );
-            
             setIngredientsTotal(res.data.ingredientsTotal || res.data.ingredients.length);
             setBrandedTotal(res.data.brandedTotal || res.data.branded.length);
-          } 
-          else if (Array.isArray(res.data)) {
-            const ingredientItems = res.data.filter((item: any) => item.type === 'ingredient');
-            const brandedItems = res.data.filter((item: any) => item.type === 'branded');
-            
-            setIngredients(ingredientItems.map((item: any) => ({
-              _id: item._id,
-              name: item.name,
-              foodGroup: item.foodGroup,
-              type: "ingredient" as const,
-            })));
-            
-            setBrandedFoods(brandedItems.map((item: any) => ({
-              _id: item._id,
-              name: item.name,
-              brandOwner: item.brandOwner,
-              brandedFoodCategory: item.brandedFoodCategory,
-              ingredients: item.ingredients,
-              type: "branded" as const,
-            })));
-            
+          } else if (Array.isArray(res.data)) {
+            const ingredientItems = res.data.filter((item: any) => item.type === "ingredient");
+            const brandedItems = res.data.filter((item: any) => item.type === "branded");
+            setIngredients(
+              ingredientItems.map((item: any) => ({
+                _id: item._id,
+                name: item.name,
+                foodGroup: item.foodGroup,
+                type: "ingredient" as const,
+              }))
+            );
+            setBrandedFoods(
+              brandedItems.map((item: any) => ({
+                _id: item._id,
+                name: item.name,
+                brandOwner: item.brandOwner,
+                brandedFoodCategory: item.brandedFoodCategory,
+                ingredients: item.ingredients,
+                type: "branded" as const,
+              }))
+            );
             setIngredientsTotal(ingredientItems.length);
             setBrandedTotal(brandedItems.length);
           }
@@ -111,31 +120,41 @@ export function useSearchFoods(query: string): CombinedSearchResults {
           setIngredientsTotal(0);
           setBrandedTotal(0);
         }
-      } catch (error) {
+      } catch {
+        if (currentRequestId !== requestIdRef.current) return;
+
+
+
+
+
+
+
         setIngredients([]);
         setBrandedFoods([]);
         setIngredientsTotal(0);
         setBrandedTotal(0);
       } finally {
-        setLoading(false);
+        if (currentRequestId === requestIdRef.current) {
+          setLoading(false);
+        }
       }
-    }, 300);
+    }, DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
   }, [query]);
 
   const loadMoreIngredients = useCallback(async () => {
-    if (loadingMore || ingredients.length >= ingredientsTotal) return;
-    
+    const currentCount = ingredientsRef.current.length;
+    if (loadingMore || currentCount >= ingredientsTotal) return;
+
     setLoadingMore(true);
     try {
       const res = await ingredientsService.searchWithSkip(
-        query, 
+        query,
         PAGE_SIZE,
-        ingredients.length, 
-        brandedFoods.length
+        currentCount,
+        0
       );
-      
       if (res.status === 200 && res.data?.ingredients) {
         const newIngredients = res.data.ingredients.map((item: any) => ({
           _id: item._id,
@@ -143,28 +162,26 @@ export function useSearchFoods(query: string): CombinedSearchResults {
           foodGroup: item.foodGroup,
           type: "ingredient" as const,
         }));
-        
-        setIngredients(prev => [...prev, ...newIngredients]);
+        setIngredients((prev) => [...prev, ...newIngredients]);
       }
-    } catch (error) {
-      console.log("Load more ingredients error:", error);
+    } catch {
     } finally {
       setLoadingMore(false);
     }
-  }, [query, ingredients.length, brandedFoods.length, ingredientsTotal, loadingMore]);
+  }, [query, ingredientsTotal, loadingMore]);
 
   const loadMoreBranded = useCallback(async () => {
-    if (loadingMore || brandedFoods.length >= brandedTotal) return;
-    
+    const currentCount = brandedRef.current.length;
+    if (loadingMore || currentCount >= brandedTotal) return;
+
     setLoadingMore(true);
     try {
       const res = await ingredientsService.searchWithSkip(
         query,
         PAGE_SIZE,
-        ingredients.length,
-        brandedFoods.length  
+        0,
+        currentCount
       );
-      
       if (res.status === 200 && res.data?.branded) {
         const newBranded = res.data.branded.map((item: any) => ({
           _id: item._id,
@@ -174,19 +191,17 @@ export function useSearchFoods(query: string): CombinedSearchResults {
           ingredients: item.ingredients,
           type: "branded" as const,
         }));
-        
-        setBrandedFoods(prev => [...prev, ...newBranded]);
+        setBrandedFoods((prev) => [...prev, ...newBranded]);
       }
-    } catch (error) {
-      console.log("Load more branded error:", error);
+    } catch {
     } finally {
       setLoadingMore(false);
     }
-  }, [query, ingredients.length, brandedFoods.length, brandedTotal, loadingMore]);
+  }, [query, brandedTotal, loadingMore]);
 
-  return { 
-    ingredients, 
-    brandedFoods, 
+  return {
+    ingredients,
+    brandedFoods,
     ingredientsTotal,
     brandedTotal,
     loading,
@@ -207,7 +222,6 @@ export function useExpandBrandedFood() {
     setLoading(true);
     try {
       const res = await brandedFoodService.getIngredients(brandedFoodId);
-      
       if (res?.status === 200 && res?.data?.mappedIngredients) {
         return res.data.mappedIngredients.map((item: any) => ({
           id: item.id,
@@ -215,8 +229,7 @@ export function useExpandBrandedFood() {
         }));
       }
       return [];
-    } catch (error) {
-      console.error("Error expanding branded food:", error);
+    } catch {
       return [];
     } finally {
       setLoading(false);

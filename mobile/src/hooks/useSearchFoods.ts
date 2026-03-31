@@ -122,13 +122,6 @@ export function useSearchFoods(query: string): CombinedSearchResults {
         }
       } catch {
         if (currentRequestId !== requestIdRef.current) return;
-
-
-
-
-
-
-
         setIngredients([]);
         setBrandedFoods([]);
         setIngredientsTotal(0);

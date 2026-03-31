@@ -36,7 +36,7 @@ export const Colors = {
     
     // Text
     textPrimary: '#111827',    
-    textSecondary: '#6B7280',  
+    textSecondary: '#69707E',  
     textTertiary: '#6A6E76',   
     
     // Borders & Dividers

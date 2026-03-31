@@ -19,10 +19,10 @@ export const Colors = {
     primaryDark: '#2C5282',    
     
     // Semantic colors
-    success: '#10B981',        
-    warning: '#F59E0B',        
-    danger: '#EF4444',         
-    info: '#06B6D4',           // Modern Cyan/Teal (Great for informational icons)
+    success: '#0A7D57',        
+    warning: '#976106',        
+    danger: '#C83939',         
+    info: '#03788B',           // Modern Cyan/Teal (Great for informational icons)
 
     // Today badge
     todayBadgeBg: '#252627',
@@ -37,7 +37,7 @@ export const Colors = {
     // Text
     textPrimary: '#111827',    
     textSecondary: '#6B7280',  
-    textTertiary: '#9CA3AF',   
+    textTertiary: '#6A6E76',   
     
     // Borders & Dividers
     border: '#E5E7EB',         
@@ -75,7 +75,7 @@ export const Colors = {
     // Text
     textPrimary: '#FFFFFF',    // Pure white
     textSecondary: '#9CA3AF',  
-    textTertiary: '#6B7280',   
+    textTertiary: '#7F8591',   
     
     // Borders & Dividers
     border: '#374151',         

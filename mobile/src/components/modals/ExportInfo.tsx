@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../theme/ThemeContext";
@@ -19,45 +18,44 @@ export function ExportInfo({ visible, onClose }: ExportInfoProps) {
   const { theme } = useTheme();
 
   return (
-    <TouchableOpacity
-      style={styles.modalBackdrop}
-      activeOpacity={1}
-      onPress={onClose} // close modal on background tap
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
     >
-      <Modal
-        visible={visible}
-        transparent
-        animationType="fade"
-        onRequestClose={onClose}
+      <TouchableOpacity
+        style={styles.modalBackdrop}
+        activeOpacity={1}
+        onPress={onClose} 
       >
-        <View style={styles.modalBackdrop}>
-          <View
-            style={[styles.modalContainer, { backgroundColor: theme.card }]}
-          >
-            <Ionicons
-              name="mail"
-              size={48}
-              color={theme.primary}
-              style={{ marginBottom: 16 }}
-            />
-            <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>
-              Export Requested
-            </Text>
-            <Text style={[styles.modalText, { color: theme.textSecondary }]}>
-              Your monthly report is being prepared. You will receive an email
-              shortly.
-            </Text>
+        <View
+          style={[styles.modalContainer, { backgroundColor: theme.card }]}
+          onStartShouldSetResponder={() => true}
+        >
+          <Ionicons
+            name="mail"
+            size={48}
+            color={theme.primary}
+            style={{ marginBottom: 16 }}
+          />
+          <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>
+            Export Requested
+          </Text>
+          <Text style={[styles.modalText, { color: theme.textSecondary }]}>
+            Your monthly report is being prepared. You will receive an email
+            shortly.
+          </Text>
 
-            <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: theme.primary }]}
-              onPress={onClose}
-            >
-              <Text style={{ color: "#fff", fontWeight: "700" }}>OK</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={[styles.modalButton, { backgroundColor: theme.primary }]}
+            onPress={onClose}
+          >
+            <Text style={{ color: "#fff", fontWeight: "700" }}>OK</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Modal>
   );
 }
 

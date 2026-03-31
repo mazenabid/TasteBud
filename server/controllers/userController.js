@@ -8,7 +8,7 @@ const getUserReportPDF = async (req, res) => {
     if (!year || !month) {
       return res.status(400).json({ error: "Year and month required" });
     }
-console.log("reached")
+
     sendUserReport(userId, Number(year), Number(month))
       .catch(err => console.error("Background report failed:", err));
     res.json({ message: "Report generated and emailed successfully" });

@@ -58,30 +58,16 @@ export function ProfileScreen({
       [key]: !prev[key as keyof typeof notifications],
     }));
   };
-
-  const handleExportData = () => {
-    Alert.alert(
-      "Export Data",
-      "Download this month's meal logs and symptom data",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Export",
-          onPress: () => {
-            setExportModalVisible(true);
-            try {
-              getMonthlyReport(year, month);
-            } catch (err) {
-              setExportModalVisible(false);
-              Alert.alert(
-                "Export Failed",
-                "Something went wrong. Please try again.",
-              );
-            }
-          },
-        },
-      ],
-    );
+  console.log("reached");
+  const handleExportData = async () => {
+    console.log("starting export");
+    setExportModalVisible(true);
+    try {
+      await getMonthlyReport(year, month);
+    } catch (err) {
+      setExportModalVisible(false);
+      Alert.alert("Export Failed", "Something went wrong. Please try again.");
+    }
   };
 
   const handleSignOut = () => {
@@ -295,10 +281,7 @@ export function ProfileScreen({
             </View>
           </View>
         </View>
-        <ExportInfo
-          visible={exportModalVisible}
-          onClose={() => setExportModalVisible(false)}
-        />
+
         {/* More Options */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
@@ -437,6 +420,10 @@ export function ProfileScreen({
 
         <View style={{ height: 40 }} />
       </ScrollView>
+      <ExportInfo
+        visible={exportModalVisible}
+        onClose={() => setExportModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }

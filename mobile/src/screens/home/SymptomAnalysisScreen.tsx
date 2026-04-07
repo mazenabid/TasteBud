@@ -17,6 +17,15 @@ import { TriggerCard } from "../../components/cards/TriggerCard";
 import { TopTriggerCard } from "../../components/cards/TopTriggerCard";
 import { useAnalysis } from "../../hooks/useAnalysis";
 
+// Time-of-day icon colors (intentional aesthetic, yellow for morning,
+// orange for afternoon, purple for evening)
+const TIME_MORNING = "#FCD34D";
+const TIME_AFTERNOON = "#FB923C";
+const TIME_EVENING = "#A78BFA";
+
+// Always-white text on saturated chart bars
+const CHART_BAR_TEXT = "#FFFFFF";
+
 interface SymptomAnalysisScreenProps {
   onBack: () => void;
 }
@@ -66,8 +75,8 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
     timeOfDay: monthlyAnalysis?.timeOfDay ?? { breakfast: 0, lunch: 0, dinner: 0 },
   };
 
-  const maxTriggerCount = topTriggers.length > 0 
-    ? Math.max(...topTriggers.map((t) => t.count)) 
+  const maxTriggerCount = topTriggers.length > 0
+    ? Math.max(...topTriggers.map((t) => t.count))
     : 1;
 
   const hasData = analysisData.totalSymptoms > 0 || topTriggers.length > 0;
@@ -100,7 +109,6 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Top Trigger Hero */}
         {topTrigger && (
           <TopTriggerCard topTrigger={topTrigger} theme={theme} isDark={isDark} />
         )}
@@ -112,7 +120,6 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
           </Text>
 
           <View style={[styles.statsCard, { backgroundColor: theme.card }]}>
-            {/* Top Row: Improvement + Ring */}
             <View style={styles.statsTopRow}>
               <View style={styles.improvementInfo}>
                 <Text style={[styles.statsLabel, { color: theme.textSecondary }]}>
@@ -131,32 +138,29 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
                     : "Same as before"}
                 </Text>
               </View>
-              
-              {/* Mini Progress Ring */}
-              <View style={[styles.miniRing, { 
-                borderColor: analysisData.monthlyImprovement >= 0 ? theme.success : theme.danger 
+
+              <View style={[styles.miniRing, {
+                borderColor: analysisData.monthlyImprovement >= 0 ? theme.success : theme.danger
               }]}>
-                <Text style={[styles.miniRingText, { 
-                  color: analysisData.monthlyImprovement >= 0 ? theme.success : theme.danger 
+                <Text style={[styles.miniRingText, {
+                  color: analysisData.monthlyImprovement >= 0 ? theme.success : theme.danger
                 }]}>
                   {analysisData.totalSymptoms === 0 ? "0" : `${Math.abs(analysisData.monthlyImprovement)}%`}
                 </Text>
               </View>
             </View>
 
-            {/* Divider */}
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
-            {/* Stats Grid */}
             <View style={styles.statsGrid}>
-              <StatItem 
+              <StatItem
                 value={analysisData.totalSymptoms}
                 label="symptoms"
                 color={analysisData.totalSymptoms === 0 ? theme.success : theme.danger}
                 theme={theme}
               />
               <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
-              <StatItem 
+              <StatItem
                 value={analysisData.symptomFreeDays}
                 label="good days"
                 color={theme.success}
@@ -195,7 +199,7 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
                           }
                           style={[styles.chartBar, { height: barHeight }]}
                         >
-                          <Text style={styles.chartBarText}>
+                          <Text style={[styles.chartBarText, { color: CHART_BAR_TEXT }]}>
                             {week.avgSeverity > 0 ? week.avgSeverity.toFixed(1) : "0"}
                           </Text>
                         </LinearGradient>
@@ -215,8 +219,8 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
         )}
 
         {/* Time of Day */}
-        {(analysisData.timeOfDay.breakfast > 0 || 
-          analysisData.timeOfDay.lunch > 0 || 
+        {(analysisData.timeOfDay.breakfast > 0 ||
+          analysisData.timeOfDay.lunch > 0 ||
           analysisData.timeOfDay.dinner > 0) && (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
@@ -228,21 +232,21 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
                 icon="sunny"
                 label="Morning"
                 percentage={analysisData.timeOfDay.breakfast}
-                color="#FCD34D"
+                color={TIME_MORNING}
                 theme={theme}
               />
               <TimeBar
                 icon="partly-sunny"
                 label="Afternoon"
                 percentage={analysisData.timeOfDay.lunch}
-                color="#FB923C"
+                color={TIME_AFTERNOON}
                 theme={theme}
               />
               <TimeBar
                 icon="moon"
                 label="Evening"
                 percentage={analysisData.timeOfDay.dinner}
-                color="#A78BFA"
+                color={TIME_EVENING}
                 theme={theme}
               />
             </View>
@@ -279,10 +283,6 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
   );
 }
 
-// ============================================================================
-// SUB-COMPONENTS
-// ============================================================================
-
 function Header({ onBack, theme }: { onBack: () => void; theme: any }) {
   return (
     <View style={styles.header}>
@@ -297,14 +297,14 @@ function Header({ onBack, theme }: { onBack: () => void; theme: any }) {
   );
 }
 
-function StatItem({ 
-  value, 
-  label, 
-  color, 
-  theme 
-}: { 
-  value: number; 
-  label: string; 
+function StatItem({
+  value,
+  label,
+  color,
+  theme
+}: {
+  value: number;
+  label: string;
   color: string;
   theme: any;
 }) {
@@ -330,10 +330,9 @@ function TimeBar({
   theme: any;
 }) {
   const isDanger = percentage >= 40;
-  
+
   return (
     <View style={styles.timeRow}>
-      {/* Fixed width container for the label to prevent overlap */}
       <View style={styles.timeRowLeft}>
         <View style={[styles.timeIconBg, { backgroundColor: `${color}20` }]}>
           <Ionicons name={icon} size={14} color={color} />
@@ -344,7 +343,6 @@ function TimeBar({
       </View>
 
       <View style={styles.timeRowRight}>
-        {/* The Track (Flex: 1 ensures it fills ONLY the remaining space) */}
         <View style={[styles.timeBar, { backgroundColor: theme.border }]}>
           <View
             style={[
@@ -353,7 +351,6 @@ function TimeBar({
             ]}
           />
         </View>
-        {/* Fixed width for the percent text so the bar doesn't jump around */}
         <Text style={[styles.timePercent, { color: isDanger ? theme.danger : theme.textPrimary }]}>
           {percentage}%
         </Text>
@@ -361,10 +358,6 @@ function TimeBar({
     </View>
   );
 }
-
-// ============================================================================
-// STYLES - Using Design System
-// ============================================================================
 
 const styles = StyleSheet.create({
   container: {
@@ -376,8 +369,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: Spacing.xxl,
   },
-
-  // Center content (loading/error/empty)
   centerContent: {
     flex: 1,
     justifyContent: "center",
@@ -409,8 +400,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
   },
-
-  // Header
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -427,8 +416,6 @@ const styles = StyleSheet.create({
     fontSize: Typography.title3.fontSize,
     fontWeight: "700",
   },
-
-  // Sections
   section: {
     paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.lg,
@@ -438,8 +425,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: Spacing.sm,
   },
-
-  // Stats Card
   statsCard: {
     borderRadius: 16,
     padding: Spacing.lg,
@@ -497,8 +482,6 @@ const styles = StyleSheet.create({
     width: 1,
     height: 40,
   },
-
-  // Chart
   chartCard: {
     borderRadius: 16,
     padding: Spacing.lg,
@@ -528,7 +511,6 @@ const styles = StyleSheet.create({
     minHeight: 24,
   },
   chartBarText: {
-    color: "#FFF",
     fontSize: 12,
     fontWeight: "700",
   },
@@ -540,8 +522,6 @@ const styles = StyleSheet.create({
     fontSize: Typography.footnote.fontSize,
     textAlign: "center",
   },
-
-  // Time of Day
   timeCard: {
     borderRadius: 16,
     padding: Spacing.lg,
@@ -580,7 +560,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.1)',
     overflow: "hidden",
   },
   timeBarFill: {
@@ -593,8 +572,6 @@ const styles = StyleSheet.create({
     width: 45,
     textAlign: "right",
   },
-
-  // Triggers list
   triggersList: {
     gap: Spacing.sm,
   },

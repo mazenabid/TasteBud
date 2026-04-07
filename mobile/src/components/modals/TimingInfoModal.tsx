@@ -1,18 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-  TextInput,
-  ActivityIndicator,
   Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+
+// Timeline orange has no semantic equivalent (sits between danger and warning)
+const TIMELINE_ORANGE = "#F97316";
 
 export function TimingInfoModal({ showTimingInfo, setShowTimingInfo, theme, isDark }: any) {
   return (
@@ -30,7 +28,7 @@ export function TimingInfoModal({ showTimingInfo, setShowTimingInfo, theme, isDa
         <View
           style={[
             styles.modalContent,
-            { backgroundColor: isDark ? "#1c1c1e" : "#fff" },
+            { backgroundColor: theme.card },
           ]}
         >
           <View style={styles.modalHeader}>
@@ -60,48 +58,36 @@ export function TimingInfoModal({ showTimingInfo, setShowTimingInfo, theme, isDa
             <View style={styles.timelineLabels}>
               <View style={styles.timelineItem}>
                 <View
-                  style={[styles.timelineDot, { backgroundColor: "#EF4444" }]}
+                  style={[styles.timelineDot, { backgroundColor: theme.danger }]}
                 />
-                <Text
-                  style={[styles.timelineTime, { color: theme.textPrimary }]}
-                >
+                <Text style={[styles.timelineTime, { color: theme.textPrimary }]}>
                   0-2h
                 </Text>
-                <Text
-                  style={[styles.timelineType, { color: theme.textSecondary }]}
-                >
+                <Text style={[styles.timelineType, { color: theme.textSecondary }]}>
                   Allergy
                 </Text>
               </View>
 
               <View style={styles.timelineItem}>
                 <View
-                  style={[styles.timelineDot, { backgroundColor: "#F97316" }]}
+                  style={[styles.timelineDot, { backgroundColor: TIMELINE_ORANGE }]}
                 />
-                <Text
-                  style={[styles.timelineTime, { color: theme.textPrimary }]}
-                >
+                <Text style={[styles.timelineTime, { color: theme.textPrimary }]}>
                   2-6h
                 </Text>
-                <Text
-                  style={[styles.timelineType, { color: theme.textSecondary }]}
-                >
+                <Text style={[styles.timelineType, { color: theme.textSecondary }]}>
                   FODMAP
                 </Text>
               </View>
 
               <View style={styles.timelineItem}>
                 <View
-                  style={[styles.timelineDot, { backgroundColor: "#34D399" }]}
+                  style={[styles.timelineDot, { backgroundColor: theme.success }]}
                 />
-                <Text
-                  style={[styles.timelineTime, { color: theme.textPrimary }]}
-                >
+                <Text style={[styles.timelineTime, { color: theme.textPrimary }]}>
                   6-24h
                 </Text>
-                <Text
-                  style={[styles.timelineType, { color: theme.textSecondary }]}
-                >
+                <Text style={[styles.timelineType, { color: theme.textSecondary }]}>
                   Intolerance
                 </Text>
               </View>
@@ -111,10 +97,10 @@ export function TimingInfoModal({ showTimingInfo, setShowTimingInfo, theme, isDa
           <View
             style={[
               styles.infoBox,
-              { backgroundColor: isDark ? "#2c2c2e" : "#f5f5f5" },
+              { backgroundColor: theme.border },
             ]}
           >
-            <Ionicons name="bulb-outline" size={18} color="#FBBF24" />
+            <Ionicons name="bulb-outline" size={18} color={theme.warning} />
             <Text style={[styles.infoBoxText, { color: theme.textSecondary }]}>
               Don't worry about being exact. An estimate is fine!
             </Text>

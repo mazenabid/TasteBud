@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   TextInput,
   ActivityIndicator,
-  Modal,
 } from "react-native";
 import Slider from '@react-native-community/slider';
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +17,39 @@ import { useSearchFoods, useExpandBrandedFood } from "../../hooks/useSearchFoods
 import { useSearchSymptom } from "../../hooks/useSymptom";
 import { SearchForm } from "./SearchForm";
 import { TimingInfoModal } from "../modals/TimingInfoModal";
+
+// ─── BRAND ACCENTS (intentional, not in semantic palette) ──────────────
+const BRANDED_PURPLE = "#7c3aed";              // Branded products tag/header
+const TIMING_BLUE = "#3B82F6";                 // Timing option selected state
+const SEVERITY_ORANGE = "#F97316";             // Severity tier 3 (between warning and danger)
+
+// Symptom callout always uses a deep dark background for clinical contrast
+const SYMPTOM_CARD_BG_DARK = "#1c1c1e";
+const SYMPTOM_CARD_BG_LIGHT = "#1F2937";
+const SYMPTOM_CARD_TEXT = "#FFFFFF";
+const SYMPTOM_CARD_TEXT_MUTED = "rgba(255,255,255,0.6)";
+const SYMPTOM_CARD_TEXT_SOFT = "rgba(255,255,255,0.7)";
+
+// Subtle section header backgrounds in the search dropdown
+const SECTION_BG_DARK = "#1a1a1a";
+const SECTION_BG_LIGHT = "#f0f0f0";
+const BRANDED_SECTION_BG_DARK = "#1a1a2e";
+const BRANDED_SECTION_BG_LIGHT = "#f0f0ff";
+
+// Selected symptom badge — soft green tint matches success accent
+const SELECTED_BADGE_BG_DARK = "#1e3a1e";
+const SELECTED_BADGE_BG_LIGHT = "#ecfdf5";
+
+// Save button gradient (intentional aesthetic — green CTA pair)
+const SAVE_GRADIENT_START = "#22C55E";
+const SAVE_GRADIENT_END = "#16A34A";
+
+// Always-white text on saturated buttons
+const BUTTON_TEXT_ON_DARK = "#FFFFFF";
+
+// Slider track color (mid-gray that reads in both modes)
+const SLIDER_TRACK_DARK = "#333333";
+const SLIDER_TRACK_LIGHT = "#e5e5e5";
 
 const ONSET_OPTIONS = [
   { id: 'immediate', label: 'Immediately', minutes: 0, subtext: 'While eating or right after' },
@@ -50,9 +82,9 @@ export function AddMealForm({
   showDropdown,
   setShowDropdown,
 }: any) {
-  const { 
-    ingredients: ingredientResults, 
-    brandedFoods, 
+  const {
+    ingredients: ingredientResults,
+    brandedFoods,
     ingredientsTotal,
     brandedTotal,
     loading: searchLoading,
@@ -62,17 +94,17 @@ export function AddMealForm({
     hasMoreIngredients,
     hasMoreBranded,
   } = useSearchFoods(ingredientInput);
-  
+
   const { expandBrandedFood, loading: expandLoading } = useExpandBrandedFood();
   const symptomRes = useSearchSymptom(symptomInput);
-  
+
   const [brandedSources, setBrandedSources] = useState<Record<string, string>>({});
-  
+
   const [showReactionSection, setShowReactionSection] = useState(false);
   const [selectedSymptom, setSelectedSymptom] = useState<{ id: string; name: string } | null>(null);
   const [selectedOnset, setSelectedOnset] = useState<string>('immediate');
   const [symptomDropdownVisible, setSymptomDropdownVisible] = useState(false);
-  
+
   const [showTimingInfo, setShowTimingInfo] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -85,14 +117,14 @@ export function AddMealForm({
   const handleSelectBrandedFood = async (item: { _id: string; name: string; brandOwner?: string }) => {
     setShowDropdown(false);
     setIngredientInput("");
-    
+
     const mappedIngredients = await expandBrandedFood(item._id);
-    
+
     if (mappedIngredients.length === 0) {
       alert(`No ingredients could be mapped from "${item.name}". Try adding ingredients manually.`);
       return;
     }
-    
+
     for (const ing of mappedIngredients) {
       addIngredient(ing.name, ing.id);
       setBrandedSources(prev => ({ ...prev, [ing.id]: item.name }));
@@ -103,16 +135,9 @@ export function AddMealForm({
     if (selectedSymptom) {
       const onsetOption = ONSET_OPTIONS.find(t => t.id === selectedOnset);
       const onsetMinutes = onsetOption?.minutes || 0;
-      
-      const now = new Date();
-      const timeString = now.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
 
       addSymptom(selectedSymptom.name, selectedSymptom.id, severity, onsetMinutes);
-      
+
       setSelectedSymptom(null);
       setSymptomInput("");
       setSeverity(5);
@@ -122,11 +147,13 @@ export function AddMealForm({
 
   const hasResults = ingredientResults.length > 0 || brandedFoods.length > 0;
 
+  // Severity color: maps to semantic palette where possible
+  // Mild = success, Moderate = warning, Severe = orange (no token), Very Severe = danger
   const getSeverityColor = (sev: number) => {
-    if (sev <= 3) return "#34D399";
-    if (sev <= 6) return "#FBBF24";
-    if (sev <= 8) return "#F97316";
-    return "#EF4444";
+    if (sev <= 3) return theme.success;
+    if (sev <= 6) return theme.warning;
+    if (sev <= 8) return SEVERITY_ORANGE;
+    return theme.danger;
   };
 
   const getSeverityLabel = (sev: number) => {
@@ -136,16 +163,13 @@ export function AddMealForm({
     return "Very Severe";
   };
 
-
-
-  // Calculate remaining counts for "Show more"
   const remainingIngredients = ingredientsTotal - ingredientResults.length;
   const remainingBranded = brandedTotal - brandedFoods.length;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-      
+
       <TimingInfoModal showTimingInfo={showTimingInfo} setShowTimingInfo={setShowTimingInfo} theme={theme} isDark={isDark} />
 
       <View style={styles.header}>
@@ -191,7 +215,7 @@ export function AddMealForm({
               <TouchableOpacity style={[styles.toggleButton, { backgroundColor: theme.card }]}>
                 <Text style={[styles.toggleButtonText, { color: theme.textPrimary }]}>Manual</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.toggleButton, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#F3F4F6" }]}>
+              <TouchableOpacity style={[styles.toggleButton, { backgroundColor: theme.border }]}>
                 <Ionicons name="camera" size={18} color={theme.textSecondary} />
                 <Text style={[styles.toggleButtonText, { color: theme.textSecondary }]}>Photo</Text>
               </TouchableOpacity>
@@ -213,7 +237,7 @@ export function AddMealForm({
                 <ActivityIndicator style={styles.searchSpinner} size="small" color={theme.primary} />
               )}
             </View>
-            
+
             {/* Dropdown */}
             {showDropdown && ingredientInput.length >= 2 && (
               <View style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -231,7 +255,7 @@ export function AddMealForm({
                     {/* INGREDIENTS SECTION */}
                     {ingredientResults.length > 0 && (
                       <>
-                        <View style={[styles.sectionHeader, { backgroundColor: isDark ? '#1a1a1a' : '#f0f0f0' }]}>
+                        <View style={[styles.sectionHeader, { backgroundColor: isDark ? SECTION_BG_DARK : SECTION_BG_LIGHT }]}>
                           <Ionicons name="leaf-outline" size={14} color={theme.textSecondary} />
                           <Text style={[styles.sectionHeaderText, { color: theme.textSecondary }]}>
                             Ingredients ({ingredientResults.length}{ingredientsTotal > ingredientResults.length ? ` of ${ingredientsTotal}` : ''})
@@ -249,11 +273,10 @@ export function AddMealForm({
                             )}
                           </TouchableOpacity>
                         ))}
-                        
-                        {/* LOAD MORE INGREDIENTS BUTTON */}
+
                         {hasMoreIngredients && (
                           <TouchableOpacity
-                            style={[styles.loadMoreButton, { backgroundColor: isDark ? '#1a1a1a' : '#f0f0f0' }]}
+                            style={[styles.loadMoreButton, { backgroundColor: isDark ? SECTION_BG_DARK : SECTION_BG_LIGHT }]}
                             onPress={loadMoreIngredients}
                             disabled={loadingMore}
                           >
@@ -271,13 +294,13 @@ export function AddMealForm({
                         )}
                       </>
                     )}
-                    
+
                     {/* BRANDED PRODUCTS SECTION */}
                     {brandedFoods.length > 0 && (
                       <>
-                        <View style={[styles.sectionHeader, { backgroundColor: isDark ? '#1a1a2e' : '#f0f0ff', marginTop: 4 }]}>
-                          <Ionicons name="pricetag-outline" size={14} color="#7c3aed" />
-                          <Text style={[styles.sectionHeaderText, { color: '#7c3aed' }]}>
+                        <View style={[styles.sectionHeader, { backgroundColor: isDark ? BRANDED_SECTION_BG_DARK : BRANDED_SECTION_BG_LIGHT, marginTop: 4 }]}>
+                          <Ionicons name="pricetag-outline" size={14} color={BRANDED_PURPLE} />
+                          <Text style={[styles.sectionHeaderText, { color: BRANDED_PURPLE }]}>
                             Branded Products ({brandedFoods.length}{brandedTotal > brandedFoods.length ? ` of ${brandedTotal}` : ''})
                           </Text>
                         </View>
@@ -299,20 +322,19 @@ export function AddMealForm({
                             <Ionicons name="chevron-forward" size={16} color={theme.textTertiary} />
                           </TouchableOpacity>
                         ))}
-                        
-                        {/* LOAD MORE BRANDED BUTTON */}
+
                         {hasMoreBranded && (
                           <TouchableOpacity
-                            style={[styles.loadMoreButton, { backgroundColor: isDark ? '#1a1a2e' : '#f0f0ff' }]}
+                            style={[styles.loadMoreButton, { backgroundColor: isDark ? BRANDED_SECTION_BG_DARK : BRANDED_SECTION_BG_LIGHT }]}
                             onPress={loadMoreBranded}
                             disabled={loadingMore}
                           >
                             {loadingMore ? (
-                              <ActivityIndicator size="small" color="#7c3aed" />
+                              <ActivityIndicator size="small" color={BRANDED_PURPLE} />
                             ) : (
                               <>
-                                <Ionicons name="chevron-down" size={16} color="#7c3aed" />
-                                <Text style={[styles.loadMoreText, { color: '#7c3aed' }]}>
+                                <Ionicons name="chevron-down" size={16} color={BRANDED_PURPLE} />
+                                <Text style={[styles.loadMoreText, { color: BRANDED_PURPLE }]}>
                                   Show {remainingBranded} more product{remainingBranded !== 1 ? 's' : ''}
                                 </Text>
                               </>
@@ -333,7 +355,7 @@ export function AddMealForm({
                   {ingredients.map((ingredient: string, index: number) => (
                     <View
                       key={index}
-                      style={[styles.tag, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#F3F4F6" }]}
+                      style={[styles.tag, { backgroundColor: theme.border }]}
                     >
                       <Text style={[styles.tagText, { color: theme.textPrimary }]}>{ingredient}</Text>
                       <TouchableOpacity onPress={() => removeIngredient(index)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -347,19 +369,19 @@ export function AddMealForm({
           </View>
 
           {/* REACTION SECTION */}
-          <TouchableOpacity 
-            style={[styles.reactionToggle, { 
-              backgroundColor: showReactionSection 
-                ? (isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.08)')
-                : (isDark ? 'rgba(255,255,255,0.05)' : '#f9fafb'),
-              borderColor: showReactionSection ? '#EF4444' : theme.border
+          <TouchableOpacity
+            style={[styles.reactionToggle, {
+              backgroundColor: showReactionSection
+                ? `${theme.danger}1a`
+                : theme.card,
+              borderColor: showReactionSection ? theme.danger : theme.border
             }]}
             onPress={() => setShowReactionSection(!showReactionSection)}
             activeOpacity={0.7}
           >
             <View style={styles.reactionToggleLeft}>
-              <View style={[styles.reactionIcon, { backgroundColor: showReactionSection ? '#EF4444' : theme.textTertiary }]}>
-                <Ionicons name="pulse" size={16} color="#FFF" />
+              <View style={[styles.reactionIcon, { backgroundColor: showReactionSection ? theme.danger : theme.textTertiary }]}>
+                <Ionicons name="pulse" size={16} color={BUTTON_TEXT_ON_DARK} />
               </View>
               <View>
                 <Text style={[styles.reactionToggleTitle, { color: theme.textPrimary }]}>
@@ -370,16 +392,16 @@ export function AddMealForm({
                 </Text>
               </View>
             </View>
-            <Ionicons 
-              name={showReactionSection ? "chevron-up" : "chevron-down"} 
-              size={20} 
-              color={theme.textSecondary} 
+            <Ionicons
+              name={showReactionSection ? "chevron-up" : "chevron-down"}
+              size={20}
+              color={theme.textSecondary}
             />
           </TouchableOpacity>
 
           {showReactionSection && (
             <View style={styles.reactionContent}>
-              
+
               {/* SYMPTOM SEARCH */}
               <Text style={[styles.fieldLabel, { color: theme.textSecondary }]}>What symptom?</Text>
               <SearchForm
@@ -400,10 +422,10 @@ export function AddMealForm({
                 showDropdown={symptomDropdownVisible}
                 results={symptomRes}
               />
-              
+
               {selectedSymptom && (
-                <View style={[styles.selectedBadge, { backgroundColor: isDark ? '#1e3a1e' : '#ecfdf5' }]}>
-                  <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
+                <View style={[styles.selectedBadge, { backgroundColor: isDark ? SELECTED_BADGE_BG_DARK : SELECTED_BADGE_BG_LIGHT }]}>
+                  <Ionicons name="checkmark-circle" size={18} color={theme.success} />
                   <Text style={[styles.selectedBadgeText, { color: theme.textPrimary }]}>
                     {selectedSymptom.name}
                   </Text>
@@ -427,7 +449,7 @@ export function AddMealForm({
                         value={severity}
                         onValueChange={(val) => setSeverity(val)}
                         minimumTrackTintColor={getSeverityColor(severity)}
-                        maximumTrackTintColor={isDark ? '#333' : '#e5e5e5'}
+                        maximumTrackTintColor={isDark ? SLIDER_TRACK_DARK : SLIDER_TRACK_LIGHT}
                         thumbTintColor={getSeverityColor(severity)}
                       />
                     </View>
@@ -447,7 +469,7 @@ export function AddMealForm({
                     <Text style={[styles.fieldLabel, { color: theme.textSecondary, marginTop: 20, marginBottom: 0 }]}>
                       How soon after eating?
                     </Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       onPress={() => setShowTimingInfo(true)}
                       style={styles.infoButton}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -465,18 +487,18 @@ export function AddMealForm({
                           style={[
                             styles.timingOption,
                             {
-                              backgroundColor: isSelected 
-                                ? (isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)')
-                                : (isDark ? 'rgba(255,255,255,0.05)' : '#f9fafb'),
-                              borderColor: isSelected ? '#3B82F6' : theme.border,
+                              backgroundColor: isSelected
+                                ? `${TIMING_BLUE}20`
+                                : theme.card,
+                              borderColor: isSelected ? TIMING_BLUE : theme.border,
                             },
                           ]}
                           onPress={() => setSelectedOnset(option.id)}
                         >
                           <Text style={[
                             styles.timingOptionText,
-                            { 
-                              color: isSelected ? '#3B82F6' : theme.textPrimary,
+                            {
+                              color: isSelected ? TIMING_BLUE : theme.textPrimary,
                               fontWeight: isSelected ? '600' : '500',
                             }
                           ]}>
@@ -489,16 +511,16 @@ export function AddMealForm({
 
                   {/* ADD SYMPTOM BUTTON */}
                   <TouchableOpacity
-                    style={[styles.addSymptomBtn, { 
+                    style={[styles.addSymptomBtn, {
                       backgroundColor: 'transparent',
                       borderWidth: 1.5,
-                      borderColor: '#3B82F6',
+                      borderColor: TIMING_BLUE,
                     }]}
                     onPress={handleAddSymptom}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="add" size={20} color="#3B82F6" />
-                    <Text style={[styles.addSymptomBtnText, { color: '#3B82F6' }]}>Add Symptom</Text>
+                    <Ionicons name="add" size={20} color={TIMING_BLUE} />
+                    <Text style={[styles.addSymptomBtnText, { color: TIMING_BLUE }]}>Add Symptom</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -509,19 +531,19 @@ export function AddMealForm({
                   {symptoms.map((symptom: any, index: number) => (
                     <View
                       key={index}
-                      style={[styles.symptomCard, { backgroundColor: isDark ? '#1c1c1e' : '#1F2937' }]}
+                      style={[styles.symptomCard, { backgroundColor: isDark ? SYMPTOM_CARD_BG_DARK : SYMPTOM_CARD_BG_LIGHT }]}
                     >
                       <View style={styles.symptomCardLeft}>
-                        <Text style={styles.symptomCardName}>{symptom.name}</Text>
+                        <Text style={[styles.symptomCardName, { color: SYMPTOM_CARD_TEXT }]}>{symptom.name}</Text>
                         <View style={styles.symptomCardMeta}>
                           <View style={[styles.symptomCardBadge, { backgroundColor: getSeverityColor(symptom.severity) }]}>
-                            <Text style={styles.symptomCardBadgeText}>{symptom.severity}/10</Text>
+                            <Text style={[styles.symptomCardBadgeText, { color: SYMPTOM_CARD_TEXT }]}>{symptom.severity}/10</Text>
                           </View>
-                          <Text style={styles.symptomCardTime}>{symptom.time}</Text>
+                          <Text style={[styles.symptomCardTime, { color: SYMPTOM_CARD_TEXT_MUTED }]}>{symptom.time}</Text>
                         </View>
                       </View>
                       <TouchableOpacity onPress={() => removeSymptom(index)} style={styles.symptomCardRemove}>
-                        <Ionicons name="trash-outline" size={18} color="rgba(255,255,255,0.6)" />
+                        <Ionicons name="trash-outline" size={18} color={SYMPTOM_CARD_TEXT_MUTED} />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -541,13 +563,13 @@ export function AddMealForm({
               colors={
                 !mealName.trim() || ingredients.length === 0
                   ? [theme.border, theme.border]
-                  : ['#22C55E', '#16A34A']
+                  : [SAVE_GRADIENT_START, SAVE_GRADIENT_END]
               }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.saveButton}
             >
-              <Text style={[styles.saveButtonText, { color: !mealName.trim() || ingredients.length === 0 ? theme.textTertiary : '#FFF' }]}>
+              <Text style={[styles.saveButtonText, { color: !mealName.trim() || ingredients.length === 0 ? theme.textTertiary : BUTTON_TEXT_ON_DARK }]}>
                 Save Meal
               </Text>
             </LinearGradient>
@@ -610,16 +632,15 @@ const styles = StyleSheet.create({
   sectionHeaderText: { fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 },
   brandedItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   brandedItemContent: { flex: 1 },
-  brandedTag: { backgroundColor: "#7c3aed", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, alignSelf: "flex-start", marginBottom: 4 },
-  brandedTagText: { color: "#FFF", fontSize: 9, fontWeight: "700", letterSpacing: 0.5 },
+  brandedTag: { backgroundColor: BRANDED_PURPLE, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, alignSelf: "flex-start", marginBottom: 4 },
+  brandedTagText: { color: BUTTON_TEXT_ON_DARK, fontSize: 9, fontWeight: "700", letterSpacing: 0.5 },
   brandedName: { fontSize: 14, fontWeight: "600" },
   brandOwner: { fontSize: 12, marginTop: 2 },
   tagsContainer: { marginTop: 12 },
   tags: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tag: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, gap: 6 },
   tagText: { fontSize: 14, fontWeight: "500" },
-  
-  // Load More Button
+
   loadMoreButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -631,8 +652,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
-  
-  // Reaction Toggle
+
   reactionToggle: {
     flexDirection: "row",
     alignItems: "center",
@@ -646,37 +666,30 @@ const styles = StyleSheet.create({
   reactionIcon: { width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center" },
   reactionToggleTitle: { fontSize: 15, fontWeight: "600" },
   reactionToggleSubtext: { fontSize: 13, marginTop: 2 },
-  
-  // Reaction Content
+
   reactionContent: { marginTop: 16 },
   fieldLabel: { fontSize: 13, fontWeight: "600", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.3 },
   selectedBadge: { flexDirection: "row", alignItems: "center", padding: 12, borderRadius: 10, marginTop: 8, gap: 8 },
   selectedBadgeText: { flex: 1, fontSize: 15, fontWeight: "500" },
-  
-  // Severity
+
   severityRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   severityBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   severityBadgeText: { fontSize: 13, fontWeight: "600" },
-  
-  // Timing
+
   timingHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
   infoButton: { padding: 4 },
-  
-  // Add Symptom
+
   addSymptomBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#22C55E",
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 20,
     gap: 8,
   },
-  addSymptomBtnText: { color: "#FFF", fontSize: 15, fontWeight: "600" },
-  
+  addSymptomBtnText: { fontSize: 15, fontWeight: "600" },
 
-  // Modern Slider
   sliderContainer: {
     marginTop: 8,
   },
@@ -697,8 +710,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
   },
-  
-  // Timing Grid
+
   timingGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -716,21 +728,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  // Symptoms List
   symptomsList: { marginTop: 16, gap: 10 },
   symptomCard: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, borderRadius: 12 },
   symptomCardLeft: { flex: 1 },
-  symptomCardName: { color: "#FFF", fontSize: 15, fontWeight: "600", marginBottom: 6 },
+  symptomCardName: { fontSize: 15, fontWeight: "600", marginBottom: 6 },
   symptomCardMeta: { flexDirection: "row", alignItems: "center", gap: 10 },
   symptomCardBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  symptomCardBadgeText: { color: "#FFF", fontSize: 11, fontWeight: "700" },
-  symptomCardTime: { color: "rgba(255,255,255,0.6)", fontSize: 12 },
+  symptomCardBadgeText: { fontSize: 11, fontWeight: "700" },
+  symptomCardTime: { fontSize: 12 },
   symptomCardRemove: { padding: 8 },
-  
-  // Save Button
+
   saveButton: { borderRadius: 14, paddingVertical: 16, alignItems: "center" },
   saveButtonText: { fontSize: 17, fontWeight: "700" },
   helperText: { fontSize: 13, textAlign: "center", marginTop: 12 },
-  
-  
 });

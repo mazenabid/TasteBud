@@ -24,10 +24,9 @@ import { useCreateMealLog } from "../../hooks/useCreateMealLog";
 import { useCreateReaction } from "../../hooks/useCreateReaction";
 import { mealLogService } from "../../services/mealLogService";
 
-interface MealLogScreenProps {
-  onBack: () => void;
-  route?: { params?: { startAdding?: boolean } };
-}
+// Always-white text on saturated button backgrounds
+const BUTTON_TEXT_ON_DANGER = "#FFFFFF";
+
 interface MealLogScreenProps {
   onBack: () => void;
   route?: { params?: { startAdding?: boolean } };
@@ -59,7 +58,7 @@ export function MealLogScreen({ onBack, route }: MealLogScreenProps) {
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-  
+
   const { createMealLog, updateMealLog } = useCreateMealLog();
   const { createReaction } = useCreateReaction();
 
@@ -94,21 +93,23 @@ export function MealLogScreen({ onBack, route }: MealLogScreenProps) {
 
   const [dayLogs, setDayLogs] = useState<DayLog[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-useEffect(() => {
-  if (route?.params?.startAdding) {
-    setIsAddingMeal(true);
-  }
-}, [route?.params?.startAdding]);
+
+  useEffect(() => {
+    if (route?.params?.startAdding) {
+      setIsAddingMeal(true);
+    }
+  }, [route?.params?.startAdding]);
+
   useEffect(() => {
     if (fetchedLogs) {
       const today = new Date();
       const todayStr = today.toDateString();
-      
+
       const logsWithExpansion = fetchedLogs.map((day: DayLog, index: number) => ({
         ...day,
         isExpanded: new Date(day.date).toDateString() === todayStr || index === 0,
       }));
-      
+
       setDayLogs(logsWithExpansion);
     }
   }, [fetchedLogs]);
@@ -172,7 +173,7 @@ useEffect(() => {
       resetForm();
       refetch();
     } catch (error) {
-      console.error("❌ Error saving meal:", error);
+      // swallow
     }
   };
 
@@ -193,19 +194,19 @@ useEffect(() => {
   };
 
   const confirmDelete = async () => {
-  if (!mealToDelete) return;
-  setIsDeleting(true);
-  try {
-    await mealLogService.deleteMealLog(mealToDelete.mealId);
-    await refetch();
-  } catch (error) {
-    Alert.alert("Error", "Failed to delete meal.");
-  } finally {
-    setIsDeleting(false);
-    setShowDeleteModal(false);
-    setMealToDelete(null);
-  }
-};
+    if (!mealToDelete) return;
+    setIsDeleting(true);
+    try {
+      await mealLogService.deleteMealLog(mealToDelete.mealId);
+      await refetch();
+    } catch (error) {
+      Alert.alert("Error", "Failed to delete meal.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setMealToDelete(null);
+    }
+  };
 
   const handleEditMeal = (dayIndex: number, meal: any) => {
     setMealName(meal.name || "");
@@ -259,19 +260,33 @@ useEffect(() => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      {/* FIXED: Inlined Modal to prevent state-change freezes */}
+      {/* Inlined delete confirmation modal */}
       <Modal visible={showDeleteModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1c1c1e' : '#fff' }]}>
-            <View style={styles.modalIcon}><Ionicons name="trash-outline" size={32} color="#EF4444" /></View>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <View style={[styles.modalIcon, { backgroundColor: `${theme.danger}1a` }]}>
+              <Ionicons name="trash-outline" size={32} color={theme.danger} />
+            </View>
             <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>Delete Meal?</Text>
-            <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>Are you sure you want to delete "{mealToDelete?.mealName}"?</Text>
+            <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
+              Are you sure you want to delete "{mealToDelete?.mealName}"?
+            </Text>
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={[styles.modalButton, styles.cancelButton, { borderColor: theme.border }]} onPress={() => setShowDeleteModal(false)} disabled={isDeleting}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton, { borderColor: theme.border }]}
+                onPress={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
                 <Text style={[styles.cancelButtonText, { color: theme.textPrimary }]}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalButton, styles.deleteButton]} onPress={confirmDelete} disabled={isDeleting}>
-                <Text style={styles.deleteButtonText}>{isDeleting ? "Deleting..." : "Delete"}</Text>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: theme.danger }]}
+                onPress={confirmDelete}
+                disabled={isDeleting}
+              >
+                <Text style={[styles.deleteButtonText, { color: BUTTON_TEXT_ON_DANGER }]}>
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -279,14 +294,16 @@ useEffect(() => {
       </Modal>
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack}><Ionicons name="chevron-back" size={28} color={theme.textPrimary} /></TouchableOpacity>
+        <TouchableOpacity onPress={onBack}>
+          <Ionicons name="chevron-back" size={28} color={theme.textPrimary} />
+        </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Meal Log</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <MonthYearSelector theme={theme} setShowMonthPicker={setShowMonthPicker} selectedMonth={selectedMonth} selectedYear={selectedYear} />
-        
+
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Past Meal Logs</Text>
           <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>View and edit your previous entries</Text>
@@ -294,7 +311,7 @@ useEffect(() => {
 
         {dayLogs.map((dayLog, dayIndex) => (
           <DayLogCard
-            key={dayLog.date.toString()} 
+            key={dayLog.date.toString()}
             dayLog={dayLog}
             dayIndex={dayIndex}
             onToggle={() => toggleDay(dayIndex)}
@@ -313,10 +330,18 @@ useEffect(() => {
         <Ionicons name="add" size={32} color={theme.todayBadgeText} />
       </TouchableOpacity>
 
-            <MonthPicker showMonthPicker={showMonthPicker} setShowMonthPicker={setShowMonthPicker} theme={theme} setSelectedMonth={setSelectedMonth} selectedMonth={selectedMonth} selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
-          </SafeAreaView>
-        );
-      }
+      <MonthPicker
+        showMonthPicker={showMonthPicker}
+        setShowMonthPicker={setShowMonthPicker}
+        theme={theme}
+        setSelectedMonth={setSelectedMonth}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
+      />
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -330,13 +355,12 @@ const styles = StyleSheet.create({
   fab: { position: "absolute", bottom: 110, right: 24, width: 64, height: 64, borderRadius: 32, justifyContent: "center", alignItems: "center", elevation: 8 },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center", padding: 24 },
   modalContent: { width: "100%", maxWidth: 320, borderRadius: 20, padding: 24, alignItems: "center" },
-  modalIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: "rgba(239, 68, 68, 0.1)", justifyContent: "center", alignItems: "center", marginBottom: 16 },
+  modalIcon: { width: 64, height: 64, borderRadius: 32, justifyContent: "center", alignItems: "center", marginBottom: 16 },
   modalTitle: { fontSize: 20, fontWeight: "700", marginBottom: 8 },
   modalMessage: { fontSize: 14, textAlign: "center", marginBottom: 24 },
   modalButtons: { flexDirection: "row", gap: 12, width: "100%" },
   modalButton: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: "center" },
   cancelButton: { borderWidth: 1 },
   cancelButtonText: { fontSize: 15, fontWeight: "600" },
-  deleteButton: { backgroundColor: "#EF4444" },
-  deleteButtonText: { color: "#FFF", fontSize: 15, fontWeight: "600" },
+  deleteButtonText: { fontSize: 15, fontWeight: "600" },
 });

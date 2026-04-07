@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,10 @@ import { FoodCard } from '../cards/FoodCard';
 function EmptyState({ theme, searchQuery }: { theme: any; searchQuery: string }) {
   return (
     <View style={styles.emptyState}>
-      <Ionicons 
-        name={searchQuery ? "search-outline" : "nutrition-outline"} 
-        size={48} 
-        color={theme.textTertiary} 
+      <Ionicons
+        name={searchQuery ? "search-outline" : "nutrition-outline"}
+        size={48}
+        color={theme.textTertiary}
       />
       <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>
         {searchQuery ? 'No foods found' : 'No foods tracked yet'}
@@ -57,7 +57,7 @@ export function MyFoodsTab({
   deleteUnsafeFood: (ingredientId: string) => void;
 }) {
   const isEmpty = safeFoods.length === 0 && suspectedFoods.length === 0 && confirmedFoods.length === 0;
-  
+
   return (
     <>
       <View style={styles.searchSection}>
@@ -77,7 +77,7 @@ export function MyFoodsTab({
           )}
         </View>
       </View>
-      
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -92,55 +92,55 @@ export function MyFoodsTab({
                 title="Suspected Triggers"
                 count={suspectedFoods.length}
                 icon="analytics-outline"
-                color="#F59E0B"
+                color={theme.warning}
                 isExpanded={expandedSections.suspected}
                 onToggle={() => toggleSection('suspected')}
                 theme={theme}
                 isDark={isDark}
               >
                 {suspectedFoods.map(food => (
-                  <FoodCard key={food.id} food={food} theme={theme} isDark={isDark}  onDelete={() => deleteUnsafeFood(food.id)}/>
+                  <FoodCard key={food.id} food={food} theme={theme} isDark={isDark} onDelete={() => deleteUnsafeFood(food.id)} />
                 ))}
               </CollapsibleSection>
             )}
-            
+
             {/* CONFIRMED SECTION */}
             {confirmedFoods.length > 0 && (
               <CollapsibleSection
                 title="Confirmed Unsafe"
                 count={confirmedFoods.length}
                 icon="close-circle-outline"
-                color="#EF4444"
+                color={theme.danger}
                 isExpanded={expandedSections.confirmed}
                 onToggle={() => toggleSection('confirmed')}
                 theme={theme}
                 isDark={isDark}
               >
                 {confirmedFoods.map(food => (
-                  <FoodCard key={food.id} food={food} theme={theme} isDark={isDark}  onDelete={() => deleteUnsafeFood(food.id)}/>
+                  <FoodCard key={food.id} food={food} theme={theme} isDark={isDark} onDelete={() => deleteUnsafeFood(food.id)} />
                 ))}
               </CollapsibleSection>
             )}
-            
+
             {safeFoods.length > 0 && (
               <CollapsibleSection
                 title="Safe Foods"
                 count={safeFoods.length}
                 icon="checkmark-circle-outline"
-                color="#22C55E"
+                color={theme.success}
                 isExpanded={expandedSections.safe}
                 onToggle={() => toggleSection('safe')}
                 theme={theme}
                 isDark={isDark}
               >
                 {safeFoods.map(food => (
-                  <FoodCard key={food.id} food={food} theme={theme} isDark={isDark}  onDelete={() => deleteUnsafeFood(food.id)}/>
+                  <FoodCard key={food.id} food={food} theme={theme} isDark={isDark} onDelete={() => deleteUnsafeFood(food.id)} />
                 ))}
               </CollapsibleSection>
             )}
           </>
         )}
-        
+
         <View style={{ height: 120 }} />
       </ScrollView>
     </>
@@ -158,10 +158,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   searchInput: { flex: 1, fontSize: 16 },
-    emptyState: { alignItems: 'center', paddingVertical: 60, gap: 12 },
+  emptyState: { alignItems: 'center', paddingVertical: 60, gap: 12 },
   emptyTitle: { fontSize: 18, fontWeight: '600' },
   emptySubtitle: { fontSize: 14, textAlign: 'center', paddingHorizontal: 40 },
   scrollView: { flex: 1 },
   scrollContent: { paddingHorizontal: 24, paddingBottom: 40 },
 });
-

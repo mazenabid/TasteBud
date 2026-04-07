@@ -6,6 +6,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
+const RANK_BADGE_TEXT = '#FFFFFF';
+
 export function TriggerCard({
   rank,
   emoji,
@@ -23,37 +25,46 @@ export function TriggerCard({
   theme: any;
   isDark: boolean;
 }) {
-  // Color based on rank
-  const getRankColor = () => {
-    if (rank === 1) return ['#EF4444', '#DC2626']; // Red
-    if (rank === 2) return ['#F59E0B', '#D97706']; // Orange
-    if (rank === 3) return ['#FBBF24', '#F59E0B']; // Yellow
-    return ['#6B7280', '#4B5563']; // Gray
+ 
+  const getRankColors = (): readonly [string, string] => {
+    if (rank === 1) return ['#EF4444', '#DC2626'] as const;
+    if (rank === 2) return ['#F59E0B', '#D97706'] as const;
+    if (rank === 3) return ['#FBBF24', '#F59E0B'] as const;
+    return ['#6B7280', '#4B5563'] as const;
   };
 
-  const rankColors = getRankColor();
-  const barWidth = Math.max((count / maxCount) * 100, 15); // Min 15% width
-  
+  const rankColors = getRankColors();
+  const barWidth = Math.max((count / maxCount) * 100, 15);
+
   return (
     <View style={[styles.triggerCard, { backgroundColor: theme.card }]}>
-      {/* Rank Badge */}
       <LinearGradient
         colors={rankColors}
         style={styles.rankBadge}
       >
         <Text style={styles.rankText}>#{rank}</Text>
       </LinearGradient>
-      
-      {/* Food Name */}
+
       <View style={styles.foodInfo}>
-        <Text style={[styles.foodName, { color: theme.textPrimary }]} numberOfLines={1}>
+        <Text
+          style={[styles.foodName, { color: theme.textPrimary }]}
+          numberOfLines={1}
+        >
           {food}
         </Text>
       </View>
-      
-      {/* Count with bar */}
+
       <View style={styles.countContainer}>
-        <View style={[styles.countBar, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+        <View
+          style={[
+            styles.countBar,
+            {
+              backgroundColor: isDark
+                ? 'rgba(255,255,255,0.1)'
+                : 'rgba(0,0,0,0.05)',
+            },
+          ]}
+        >
           <LinearGradient
             colors={rankColors}
             start={{ x: 0, y: 0 }}
@@ -85,7 +96,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rankText: {
-    color: '#FFF',
+    color: RANK_BADGE_TEXT,
     fontSize: 14,
     fontWeight: '800',
   },

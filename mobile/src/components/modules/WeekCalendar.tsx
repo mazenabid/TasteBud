@@ -8,6 +8,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+// Playful coral accent for the "add meal" sleeve animation behind today
+const SLEEVE_ACCENT = '#FF6B6B';
+const SLEEVE_ICON_COLOR = '#FFFFFF';
+
 export function WeekCalendar({
   onAddMeal,
   theme,
@@ -16,7 +20,7 @@ export function WeekCalendar({
   theme: any;
 }) {
   const slideAnim = useRef(new Animated.Value(0)).current;
-  
+
   useEffect(() => {
     Animated.sequence([
       Animated.delay(400),
@@ -36,14 +40,14 @@ export function WeekCalendar({
   }, []);
 
   const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  
+
   const dates = [];
   for (let i = 0; i < 7; i++) {
     const date = new Date();
     date.setDate(date.getDate() - date.getDay() + i);
     dates.push(date);
   }
-  
+
   const isToday = (date: Date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
@@ -53,27 +57,27 @@ export function WeekCalendar({
     inputRange: [0, 1],
     outputRange: [0, 36],
   });
-  
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.calendar}>
         {dates.map((date, index) => {
           const today = isToday(date);
-          
+
           if (today) {
             return (
               <View key={index} style={styles.todayWrapper}>
-                <Animated.View 
+                <Animated.View
                   style={[
                     styles.sleeve,
-                    { 
-                      backgroundColor: '#FF6B6B',
+                    {
+                      backgroundColor: SLEEVE_ACCENT,
                       transform: [{ translateY: slideY }],
-                    }
+                    },
                   ]}
                 >
                   <View style={styles.sleeveContent}>
-                    <Ionicons name="add" size={16} color="#FFF" />
+                    <Ionicons name="add" size={16} color={SLEEVE_ICON_COLOR} />
                   </View>
                 </Animated.View>
                 <TouchableOpacity
@@ -94,7 +98,7 @@ export function WeekCalendar({
               </View>
             );
           }
-          
+
           return (
             <View
               key={index}

@@ -1,23 +1,17 @@
-/**
- * FoodLibraryCard - Full width food library card
- */
-
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
   Animated,
-  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../theme/ThemeContext";
-import { LiquidGlassTabBar } from "../modules/LiquidGlassTabBar";
+
+const ACCENT_GREEN_DARK = "#065F46";
+const ACCENT_GREEN_MEDIUM = "#047857";
 
 export function FoodLibraryCard({
   unsafeFoodsCount,
@@ -30,6 +24,8 @@ export function FoodLibraryCard({
   isDark: boolean;
   theme: any;
 }) {
+  const { theme: contextTheme } = useTheme();
+  const activeTheme = theme || contextTheme;
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -50,6 +46,15 @@ export function FoodLibraryCard({
     }).start();
   };
 
+  const titleColor = isDark ? activeTheme.textPrimary : ACCENT_GREEN_DARK;
+  const subtitleColor = isDark
+    ? "rgba(255,255,255,0.8)"
+    : ACCENT_GREEN_MEDIUM;
+  const iconColor = isDark ? activeTheme.textPrimary : ACCENT_GREEN_DARK;
+  const iconBgColor = isDark
+    ? "rgba(255,255,255,0.2)"
+    : "rgba(6,95,70,0.1)";
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -66,19 +71,11 @@ export function FoodLibraryCard({
         >
           <View style={styles.foodLibraryContent}>
             <View>
-              <Text
-                style={[
-                  styles.foodLibraryTitle,
-                  { color: isDark ? "#FFF" : "#065F46" },
-                ]}
-              >
+              <Text style={[styles.foodLibraryTitle, { color: titleColor }]}>
                 Food Library
               </Text>
               <Text
-                style={[
-                  styles.foodLibrarySubtitle,
-                  { color: isDark ? "rgba(255,255,255,0.8)" : "#047857" },
-                ]}
+                style={[styles.foodLibrarySubtitle, { color: subtitleColor }]}
               >
                 {unsafeFoodsCount > 0
                   ? `${unsafeFoodsCount} unsafe foods identified`
@@ -86,20 +83,9 @@ export function FoodLibraryCard({
               </Text>
             </View>
             <View
-              style={[
-                styles.foodLibraryIcon,
-                {
-                  backgroundColor: isDark
-                    ? "rgba(255,255,255,0.2)"
-                    : "rgba(6,95,70,0.1)",
-                },
-              ]}
+              style={[styles.foodLibraryIcon, { backgroundColor: iconBgColor }]}
             >
-              <Ionicons
-                name="book"
-                size={28}
-                color={isDark ? "#FFF" : "#065F46"}
-              />
+              <Ionicons name="book" size={28} color={iconColor} />
             </View>
           </View>
         </LinearGradient>

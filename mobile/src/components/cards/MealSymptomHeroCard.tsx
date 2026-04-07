@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
+import { useTheme } from '../../theme/ThemeContext';
 
 function createArc(
   centerX: number,
@@ -30,6 +31,10 @@ function createArc(
   return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
 }
 
+// Brand accent for the warm breakfast hero card aesthetic
+const BRAND_ACCENT_BROWN = '#92400E';
+const BRAND_ACCENT_BROWN_MUTED = 'rgba(146, 64, 14, 0.25)';
+
 export function MealSymptomHeroCard({
   mealCount,
   reacCount,
@@ -41,6 +46,7 @@ export function MealSymptomHeroCard({
   onPress: () => void;
   isDark: boolean;
 }) {
+  const { theme } = useTheme();
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -66,8 +72,8 @@ export function MealSymptomHeroCard({
   const center = size / 2;
   const radius = 65;
   const strokeWidth = 8;
-  const gap = 12; 
-  const arcLength = (360 - gap * 3) / 3; 
+  const gap = 12;
+  const arcLength = (360 - gap * 3) / 3;
 
   const filledArcs = Math.min(mealCount, 3);
 
@@ -93,19 +99,18 @@ export function MealSymptomHeroCard({
         >
           <View style={styles.heroTop}>
             <Text style={styles.heroTitle}>Meal & Symptom Logs</Text>
-            <Ionicons name="restaurant" size={24} color="#92400E" />
+            <Ionicons name="restaurant" size={24} color={BRAND_ACCENT_BROWN} />
           </View>
 
           {/* Radial Display with Arcs */}
           <View style={styles.heroRadial}>
             <View style={styles.circleContainer}>
-              {/* SVG Arcs */}
               <Svg width={size} height={size} style={styles.svgContainer}>
                 {arcs.map((arc, index) => (
                   <Path
                     key={index}
                     d={createArc(center, center, radius, arc.start, arc.end)}
-                    stroke={index < filledArcs ? '#92400E' : 'rgba(146, 64, 14, 0.25)'}
+                    stroke={index < filledArcs ? BRAND_ACCENT_BROWN : BRAND_ACCENT_BROWN_MUTED}
                     strokeWidth={strokeWidth}
                     strokeLinecap="round"
                     fill="none"
@@ -113,7 +118,6 @@ export function MealSymptomHeroCard({
                 ))}
               </Svg>
 
-              {/* Center Content */}
               <View style={styles.centerContent}>
                 <Text style={styles.heroValue}>{mealCount}</Text>
                 <Text style={styles.heroSubtext}>meals today</Text>
@@ -127,7 +131,7 @@ export function MealSymptomHeroCard({
               <View
                 style={[
                   styles.heroDot,
-                  { backgroundColor: reacCount > 0 ? '#EF4444' : '#22C55E' },
+                  { backgroundColor: reacCount > 0 ? theme.danger : theme.success },
                 ]}
               />
               <Text style={styles.heroStatText}>
@@ -136,7 +140,7 @@ export function MealSymptomHeroCard({
             </View>
             <TouchableOpacity style={styles.heroAction} onPress={onPress}>
               <Text style={styles.heroActionText}>View details</Text>
-              <Ionicons name="arrow-forward" size={16} color="#92400E" />
+              <Ionicons name="arrow-forward" size={16} color={BRAND_ACCENT_BROWN} />
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -160,7 +164,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#92400E',
+    color: BRAND_ACCENT_BROWN,
   },
   heroRadial: {
     alignItems: 'center',
@@ -182,12 +186,12 @@ const styles = StyleSheet.create({
   heroValue: {
     fontSize: 52,
     fontWeight: '700',
-    color: '#92400E',
+    color: BRAND_ACCENT_BROWN,
   },
   heroSubtext: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#92400E',
+    color: BRAND_ACCENT_BROWN,
     marginTop: 2,
   },
   heroBottom: {
@@ -207,7 +211,7 @@ const styles = StyleSheet.create({
   },
   heroStatText: {
     fontSize: 14,
-    color: '#92400E',
+    color: BRAND_ACCENT_BROWN,
   },
   heroStatBold: {
     fontWeight: '700',
@@ -220,6 +224,6 @@ const styles = StyleSheet.create({
   heroActionText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#92400E',
+    color: BRAND_ACCENT_BROWN,
   },
 });

@@ -1,32 +1,27 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   StatusBar,
   TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Modal,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme/ThemeContext';
 import { useUnsafeFoods } from '../../hooks/useUnsafeFoods';
-import { useSearchFoods } from '../../hooks/useSearchFoods';
 import { useSuspectedFoods } from '../../hooks/useSuspectedFoods';
 import { MyFoodsTab } from '../../components/tabs/MyFoodsTab';
 import { BrowseTab } from '../../components/tabs/BrowseTab';
 import { Food } from '../../types/Food';
 
+// Always-white retry button text on theme.primary background
+const BUTTON_TEXT_ON_PRIMARY = "#FFFFFF";
+
 interface FoodLibraryScreenProps {
   onBack: () => void;
 }
-
-
 
 type MainTab = 'my_foods' | 'browse';
 
@@ -34,31 +29,31 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
   const { theme, isDark } = useTheme();
   const [mainTab, setMainTab] = useState<MainTab>('my_foods');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [expandedSections, setExpandedSections] = useState({
     safe: true,
     suspected: true,
     confirmed: true,
   });
-  
+
   const { data: unsafeFoodsData, isLoading, error, refetch } = useUnsafeFoods();
   const { data: suspectedData } = useSuspectedFoods();
-  
+
   const { safeFoods, suspectedFoods, confirmedFoods } = useMemo(() => {
     const safe: Food[] = [];
     const suspected: Food[] = [];
     const confirmed: Food[] = [];
-    
+
     if (unsafeFoodsData?.ingredients) {
       const seen = new Set<string>();
-      
+
       unsafeFoodsData.ingredients.forEach((item: any) => {
         const ingredientId = item.ingredient?._id;
         if (!ingredientId || seen.has(ingredientId)) return;
         seen.add(ingredientId);
-        
+
         const algoData = suspectedData?.find((s: any) => s.ingredientId === ingredientId);
-        
+
         const food: Food = {
           id: item._id,
           name: item.ingredient?.name || 'Unknown',
@@ -76,7 +71,7 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
           reactionMeals: algoData?.reactionMeals,
           recommendation: algoData?.recommendation,
         };
-        
+
         if (item.status === 'safe') {
           safe.push(food);
         } else if (item.status === 'suspected') {
@@ -86,24 +81,23 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
         }
       });
     }
-    
+
     return { safeFoods: safe, suspectedFoods: suspected, confirmedFoods: confirmed };
   }, [unsafeFoodsData, suspectedData]);
-  
+
   const filterBySearch = (foods: Food[]) => {
     if (!searchQuery.trim()) return foods;
-    return foods.filter(f => 
+    return foods.filter(f =>
       f.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   };
-  
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const deleteUnsafeFood = async (ingredientId: string) => {
-};
-  
+  const deleteUnsafeFood = async (ingredientId: string) => {};
+
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -118,7 +112,7 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
       </SafeAreaView>
     );
   }
-  
+
   if (error) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -129,28 +123,30 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
           <Text style={[styles.errorText, { color: theme.textPrimary }]}>
             Failed to load
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.retryButton, { backgroundColor: theme.primary }]}
             onPress={refetch}
           >
-            <Text style={styles.retryButtonText}>Try Again</Text>
+            <Text style={[styles.retryButtonText, { color: BUTTON_TEXT_ON_PRIMARY }]}>
+              Try Again
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
-  
+
   const totalCount = safeFoods.length + suspectedFoods.length + confirmedFoods.length;
-  
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      
+
       <Header onBack={onBack} theme={theme} subtitle={`${totalCount} foods tracked`} />
-      
+
       {/* Main Tab Selector */}
       <View style={styles.tabSelectorContainer}>
-        <View style={[styles.tabSelector, { backgroundColor: isDark ? '#1c1c1e' : '#f0f0f0' }]}>
+        <View style={[styles.tabSelector, { backgroundColor: theme.border }]}>
           <TouchableOpacity
             style={[
               styles.tabSelectorButton,
@@ -181,7 +177,7 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
           </TouchableOpacity>
         </View>
       </View>
-      
+
       {mainTab === 'my_foods' ? (
         <MyFoodsTab
           theme={theme}
@@ -206,12 +202,12 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
   );
 }
 
-function Header({ 
-  onBack, 
-  theme, 
-  subtitle 
-}: { 
-  onBack: () => void; 
+function Header({
+  onBack,
+  theme,
+  subtitle
+}: {
+  onBack: () => void;
   theme: any;
   subtitle?: string;
 }) {
@@ -237,16 +233,14 @@ function Header({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  
-  // Loading & Error
+
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 },
   loadingText: { fontSize: 16 },
   errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
   errorText: { fontSize: 18, fontWeight: '600' },
   retryButton: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 10 },
-  retryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
-  
-  // Header
+  retryButtonText: { fontSize: 16, fontWeight: '600' },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -259,8 +253,7 @@ const styles = StyleSheet.create({
   headerCenter: { flex: 1, alignItems: 'center' },
   headerTitle: { fontSize: 18, fontWeight: '700' },
   headerSubtitle: { fontSize: 13, marginTop: 2 },
-  
-  // Tab Selector
+
   tabSelectorContainer: { paddingHorizontal: 24, marginBottom: 16 },
   tabSelector: {
     flexDirection: 'row',
@@ -274,10 +267,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabSelectorText: { fontSize: 14, fontWeight: '600' },
-  
-  trackRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 },
-  trackBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  trackBadgeText: { fontSize: 11, fontWeight: '600' },
-  confidenceText: { fontSize: 11 },
-
 });

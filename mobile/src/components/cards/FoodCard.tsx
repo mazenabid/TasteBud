@@ -3,6 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Food } from "../../types/Food";
 
+const TRACK_INTOLERANCE_PURPLE = "#8B5CF6";
+
+const RECOMMENDATION_BG_DARK = "#1a1a1a";
+const RECOMMENDATION_BG_LIGHT = "#fff7ed";
+
 export function FoodCard({
   food,
   theme,
@@ -21,13 +26,17 @@ export function FoodCard({
       case "ige_allergy":
         return {
           label: "Allergy Pattern",
-          color: "#EF4444",
+          color: theme.danger,
           icon: "alert-circle",
         };
       case "fodmap":
-        return { label: "FODMAP", color: "#F59E0B", icon: "nutrition" };
+        return { label: "FODMAP", color: theme.warning, icon: "nutrition" };
       case "intolerance":
-        return { label: "Intolerance", color: "#8B5CF6", icon: "time" };
+        return {
+          label: "Intolerance",
+          color: TRACK_INTOLERANCE_PURPLE,
+          icon: "time",
+        };
       default:
         return null;
     }
@@ -50,11 +59,17 @@ export function FoodCard({
 
   const trackInfo = getTrackInfo(food.track);
 
+  const getSeverityColor = (severity: number) => {
+    if (severity >= 7) return theme.danger;
+    if (severity >= 4) return theme.warning;
+    return theme.success;
+  };
+
   return (
     <TouchableOpacity
       style={[
         styles.foodCard,
-        { backgroundColor: isDark ? "#1c1c1e" : "#f9fafb" },
+        { backgroundColor: theme.card },
       ]}
       onPress={() => setIsExpanded(!isExpanded)}
       activeOpacity={0.7}
@@ -161,12 +176,7 @@ export function FoodCard({
                       styles.severityBarFill,
                       {
                         width: `${(food.avgSeverity / 10) * 100}%`,
-                        backgroundColor:
-                          food.avgSeverity >= 7
-                            ? "#EF4444"
-                            : food.avgSeverity >= 4
-                              ? "#F59E0B"
-                              : "#22C55E",
+                        backgroundColor: getSeverityColor(food.avgSeverity),
                       },
                     ]}
                   />
@@ -208,7 +218,11 @@ export function FoodCard({
             <View
               style={[
                 styles.recommendationBox,
-                { backgroundColor: isDark ? "#1a1a1a" : "#fff7ed" },
+                {
+                  backgroundColor: isDark
+                    ? RECOMMENDATION_BG_DARK
+                    : RECOMMENDATION_BG_LIGHT,
+                },
               ]}
             >
               <Text

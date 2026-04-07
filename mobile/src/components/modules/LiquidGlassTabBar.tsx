@@ -1,8 +1,3 @@
-/**
- * LIQUID GLASS TAB BAR
- * Professional, subtle, accessible
- */
-
 import React, { useRef, useEffect } from 'react';
 import {
   View,
@@ -35,10 +30,9 @@ const { width } = Dimensions.get('window');
 export function LiquidGlassTabBar({ tabs, selectedTab, onTabPress }: LiquidGlassTabBarProps) {
   const { theme, shadows, isDark } = useTheme();
   const selectedIndex = tabs.findIndex(t => t.id === selectedTab);
-  
-  // Animated value for indicator position
+
   const indicatorPosition = useRef(new Animated.Value(selectedIndex)).current;
-  
+
   useEffect(() => {
     Animated.spring(indicatorPosition, {
       toValue: selectedIndex,
@@ -47,19 +41,16 @@ export function LiquidGlassTabBar({ tabs, selectedTab, onTabPress }: LiquidGlass
       stiffness: 200,
     }).start();
   }, [selectedIndex]);
-  
-  const tabWidth = (width - 48) / tabs.length;
-  
+
   return (
     <View style={[styles.container, shadows.large]}>
-      {/* Glass background with blur */}
       <BlurView
         intensity={isDark ? 80 : 60}
         tint={isDark ? 'dark' : 'light'}
         style={styles.blurContainer}
       >
         <LinearGradient
-          colors={isDark 
+          colors={isDark
             ? ['rgba(28, 28, 30, 0.9)', 'rgba(44, 44, 46, 0.8)']
             : ['rgba(255, 255, 255, 0.95)', 'rgba(248, 249, 250, 0.9)']
           }
@@ -67,11 +58,6 @@ export function LiquidGlassTabBar({ tabs, selectedTab, onTabPress }: LiquidGlass
           end={{ x: 1, y: 1 }}
           style={[styles.gradient, { borderColor: theme.border }]}
         >
-          {/* Morphing indicator */}
-          
-          
-          
-          {/* Tab buttons */}
           <View style={styles.tabsContainer}>
             {tabs.map((tab) => (
               <TabButton
@@ -88,20 +74,20 @@ export function LiquidGlassTabBar({ tabs, selectedTab, onTabPress }: LiquidGlass
   );
 }
 
-function TabButton({ 
-  tab, 
-  isSelected, 
-  onPress 
-}: { 
-  tab: Tab; 
-  isSelected: boolean; 
+function TabButton({
+  tab,
+  isSelected,
+  onPress,
+}: {
+  tab: Tab;
+  isSelected: boolean;
   onPress: () => void;
 }) {
-  const { theme, isDark } = useTheme();
-  
-  // Simple color: white in dark mode, black in light mode
-  const iconColor = isDark ? "#FFFFFF" : "#000000";
-  
+  const { theme } = useTheme();
+
+  // theme.textPrimary = white in dark mode, near-black in light mode
+  const iconColor = theme.textPrimary;
+
   return (
     <TouchableOpacity
       onPress={onPress}

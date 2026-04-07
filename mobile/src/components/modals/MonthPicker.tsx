@@ -8,6 +8,9 @@ import {
   Modal,
 } from "react-native";
 
+// Always-white text for selected pills, sits on theme.primary
+const SELECTED_TEXT = "#FFFFFF";
+
 interface MonthPickerProps {
   showMonthPicker: boolean;
   setShowMonthPicker: (show: boolean) => void;
@@ -59,7 +62,7 @@ export function MonthPicker({
         onPress={() => setShowMonthPicker(false)}
       >
         <View
-style={[styles.container, { backgroundColor: theme.todayBadgeBg }]}
+          style={[styles.container, { backgroundColor: theme.todayBadgeBg }]}
           onStartShouldSetResponder={() => true}
         >
           <View style={styles.tabs}>
@@ -72,7 +75,7 @@ style={[styles.container, { backgroundColor: theme.todayBadgeBg }]}
             >
               <Text style={[
                 styles.tabText,
-                { color: tab === 'month' ? '#FFF' : theme.todayBadgeText }
+                { color: tab === 'month' ? SELECTED_TEXT : theme.todayBadgeText }
               ]}>
                 {MONTHS[selectedMonth - 1]}
               </Text>
@@ -86,7 +89,7 @@ style={[styles.container, { backgroundColor: theme.todayBadgeBg }]}
             >
               <Text style={[
                 styles.tabText,
-                { color: tab === 'year' ? '#FFF' : theme.todayBadgeText }
+                { color: tab === 'year' ? SELECTED_TEXT : theme.todayBadgeText }
               ]}>
                 {selectedYear}
               </Text>
@@ -107,7 +110,7 @@ style={[styles.container, { backgroundColor: theme.todayBadgeBg }]}
                   >
                     <Text style={[
                       styles.monthText,
-                      { color: (index + 1) === selectedMonth ? '#FFF' : theme.todayBadgeText }
+                      { color: (index + 1) === selectedMonth ? SELECTED_TEXT : theme.todayBadgeText }
                     ]}>
                       {month.slice(0, 3)}
                     </Text>
@@ -127,7 +130,7 @@ style={[styles.container, { backgroundColor: theme.todayBadgeBg }]}
                   >
                     <Text style={[
                       styles.yearText,
-                      { color: year === selectedYear ? '#FFF' : theme.todayBadgeText }
+                      { color: year === selectedYear ? SELECTED_TEXT : theme.todayBadgeText }
                     ]}>
                       {year}
                     </Text>

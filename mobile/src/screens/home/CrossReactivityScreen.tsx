@@ -15,6 +15,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme/ThemeContext';
 import { useCrossReactivity } from '../../hooks/useCrossReactivity';
 
+// Always-white text/icons that sit on saturated gradient backgrounds
+const TEXT_ON_GRADIENT = "#FFFFFF";
+
+// Info box dark background — deeper than theme.card for visual contrast
+const INFO_BOX_BG_DARK = "#000000";
+const INFO_BOX_BG_LIGHT = "#F9FAFB";
+
 interface CrossReactivityScreenProps {
   onBack: () => void;
 }
@@ -44,20 +51,21 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
   const { data, isLoading, error, refetch, toggleExpand } = useCrossReactivity();
   const [showAllergies, setShowAllergies] = useState(false);
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
-  
+
+  // Risk level colors map directly to semantic palette:
+  // high = danger, medium = warning, low = success
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'high': return '#EF4444';
-      case 'medium': return '#F59E0B';
-      case 'low': return '#22C55E';
+      case 'high': return theme.danger;
+      case 'medium': return theme.warning;
+      case 'low': return theme.success;
       default: return theme.textSecondary;
     }
   };
 
-  // Filter cross-reactivities based on selected risk level
   const filteredData = useMemo(() => {
     if (!data || riskFilter === 'all') return data?.crossReactivities || [];
-    
+
     return data.crossReactivities
       .map(item => ({
         ...item,
@@ -66,7 +74,6 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
       .filter(item => item.relatedFoods.length > 0);
   }, [data, riskFilter]);
 
-  // Count foods by risk level for an allergen
   const getRiskCounts = (relatedFoods: RelatedFood[]) => {
     const counts = { high: 0, medium: 0, low: 0 };
     relatedFoods.forEach(food => {
@@ -75,7 +82,6 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
     return counts;
   };
 
-  // Get summary text for collapsed card
   const getCollapsedSummary = (relatedFoods: RelatedFood[]) => {
     const counts = getRiskCounts(relatedFoods);
     const parts = [];
@@ -84,7 +90,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
     if (counts.low > 0) parts.push(`${counts.low} low`);
     return parts.join(', ') + ' risk';
   };
-  
+
   // Loading state
   if (isLoading) {
     return (
@@ -108,7 +114,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
       </SafeAreaView>
     );
   }
-  
+
   // Error state
   if (error) {
     return (
@@ -131,17 +137,17 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
           <Text style={[styles.errorSubtext, { color: theme.textSecondary }]}>
             {error}
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.retryButton, { backgroundColor: theme.primary }]}
             onPress={refetch}
           >
-            <Text style={styles.retryButtonText}>Try Again</Text>
+            <Text style={[styles.retryButtonText, { color: TEXT_ON_GRADIENT }]}>Try Again</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
-  
+
   // Empty state - no allergies tracked
   if (!data || data.userAllergies.length === 0) {
     return (
@@ -168,7 +174,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
       </SafeAreaView>
     );
   }
-  
+
   // Empty cross-reactivities but has allergies
   if (data.crossReactivities.length === 0) {
     return (
@@ -188,9 +194,8 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Collapsible Allergies Section */}
           <View style={styles.section}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.allergiesToggle, { backgroundColor: theme.card }]}
               onPress={() => setShowAllergies(!showAllergies)}
               activeOpacity={0.7}
@@ -208,21 +213,21 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
                   </Text>
                 </View>
               </View>
-              <Ionicons 
-                name={showAllergies ? "chevron-up" : "chevron-down"} 
-                size={20} 
-                color={theme.textSecondary} 
+              <Ionicons
+                name={showAllergies ? "chevron-up" : "chevron-down"}
+                size={20}
+                color={theme.textSecondary}
               />
             </TouchableOpacity>
-            
+
             {showAllergies && (
               <View style={[styles.allergiesExpanded, { backgroundColor: theme.card }]}>
                 <View style={styles.allergyTags}>
                   {data.userAllergies.map((allergy, index) => (
-                    <View 
+                    <View
                       key={index}
-                      style={[styles.allergyTag, { 
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#F3F4F6',
+                      style={[styles.allergyTag, {
+                        backgroundColor: theme.border,
                         borderColor: theme.border,
                       }]}
                     >
@@ -235,7 +240,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
               </View>
             )}
           </View>
-          
+
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyEmoji}>✅</Text>
             <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>
@@ -249,12 +254,11 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
       </SafeAreaView>
     );
   }
-  
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      
-      {/* Header */}
+
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="chevron-back" size={28} color={theme.textPrimary} />
@@ -264,7 +268,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
         </Text>
         <View style={{ width: 40 }} />
       </View>
-      
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -272,7 +276,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
       >
         {/* Collapsible Allergies Section */}
         <View style={styles.section}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.allergiesToggle, { backgroundColor: theme.card }]}
             onPress={() => setShowAllergies(!showAllergies)}
             activeOpacity={0.7}
@@ -290,21 +294,21 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
                 </Text>
               </View>
             </View>
-            <Ionicons 
-              name={showAllergies ? "chevron-up" : "chevron-down"} 
-              size={20} 
-              color={theme.textSecondary} 
+            <Ionicons
+              name={showAllergies ? "chevron-up" : "chevron-down"}
+              size={20}
+              color={theme.textSecondary}
             />
           </TouchableOpacity>
-          
+
           {showAllergies && (
             <View style={[styles.allergiesExpanded, { backgroundColor: theme.card }]}>
               <View style={styles.allergyTags}>
                 {data.userAllergies.map((allergy, index) => (
-                  <View 
+                  <View
                     key={index}
-                    style={[styles.allergyTag, { 
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#F3F4F6',
+                    style={[styles.allergyTag, {
+                      backgroundColor: theme.border,
                       borderColor: theme.border,
                     }]}
                   >
@@ -326,7 +330,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
               count={data.riskOverview.high + data.riskOverview.medium + data.riskOverview.low}
               isActive={riskFilter === 'all'}
               onPress={() => setRiskFilter('all')}
-              color={theme.primary}
+              color={theme.textPrimary}
               theme={theme}
               isDark={isDark}
             />
@@ -335,7 +339,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
               count={data.riskOverview.high}
               isActive={riskFilter === 'high'}
               onPress={() => setRiskFilter('high')}
-              color="#EF4444"
+              color={theme.danger}
               theme={theme}
               isDark={isDark}
             />
@@ -344,7 +348,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
               count={data.riskOverview.medium}
               isActive={riskFilter === 'medium'}
               onPress={() => setRiskFilter('medium')}
-              color="#F59E0B"
+              color={theme.warning}
               theme={theme}
               isDark={isDark}
             />
@@ -353,27 +357,27 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
               count={data.riskOverview.low}
               isActive={riskFilter === 'low'}
               onPress={() => setRiskFilter('low')}
-              color="#22C55E"
+              color={theme.success}
               theme={theme}
               isDark={isDark}
             />
           </View>
         </View>
-        
+
         {/* Cross-Reactivities */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             Foods to watch
           </Text>
           <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
-            {riskFilter === 'all' 
-              ? 'Tap any card to see details' 
+            {riskFilter === 'all'
+              ? 'Tap any card to see details'
               : `Showing ${riskFilter} risk foods only`}
           </Text>
-          
+
           {filteredData.length === 0 ? (
             <View style={[styles.noResultsCard, { backgroundColor: theme.card }]}>
-              <Ionicons name="checkmark-circle" size={32} color="#22C55E" />
+              <Ionicons name="checkmark-circle" size={32} color={theme.success} />
               <Text style={[styles.noResultsText, { color: theme.textPrimary }]}>
                 No {riskFilter} risk foods found
               </Text>
@@ -393,24 +397,20 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
             ))
           )}
         </View>
-        
+
         {/* Educational Footer */}
-        <View style={[styles.footerCard, { backgroundColor: isDark ? '#1C1C1E' : '#F9FAFB' }]}>
+        <View style={[styles.footerCard, { backgroundColor: theme.card }]}>
           <Ionicons name="information-circle" size={24} color={theme.primary} />
           <Text style={[styles.footerText, { color: theme.textSecondary }]}>
             Cross-reactivity occurs when proteins in different foods are similar enough that your immune system mistakes them for your known allergens. Always consult with an allergist before introducing new foods.
           </Text>
         </View>
-        
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-// ============================================================================
-// SUB-COMPONENTS
-// ============================================================================
 
 function FilterTab({
   label,
@@ -451,7 +451,7 @@ function FilterTab({
       ]}>
         <Text style={[
           styles.filterCount,
-          { color: isActive ? '#FFF' : theme.textSecondary },
+          { color: isActive ? TEXT_ON_GRADIENT : theme.textSecondary },
         ]}>
           {count}
         </Text>
@@ -477,9 +477,14 @@ function AllergenCard({
   isDark: boolean;
   riskFilter: RiskFilter;
 }) {
-  const displayFoods = riskFilter === 'all' 
-    ? item.relatedFoods 
+  const displayFoods = riskFilter === 'all'
+    ? item.relatedFoods
     : item.relatedFoods.filter(f => f.riskLevel === riskFilter);
+
+  // In dark mode, header text sits on a saturated colored gradient — use white.
+  // In light mode, text sits on a soft tint — use the allergen's accent color.
+  const headerTextColor = isDark ? TEXT_ON_GRADIENT : item.color;
+  const headerSummaryColor = isDark ? 'rgba(255,255,255,0.7)' : `${item.color}99`;
 
   return (
     <View style={styles.allergenCard}>
@@ -488,7 +493,7 @@ function AllergenCard({
         activeOpacity={0.7}
       >
         <LinearGradient
-          colors={isDark 
+          colors={isDark
             ? [item.color, `${item.color}DD`]
             : [`${item.color}30`, `${item.color}20`]
           }
@@ -499,34 +504,31 @@ function AllergenCard({
           <View style={styles.allergenHeaderLeft}>
             <Text style={styles.allergenEmoji}>{item.emoji}</Text>
             <View style={styles.allergenInfo}>
-              <Text style={[styles.allergenName, { color: isDark ? '#FFF' : item.color }]}>
+              <Text style={[styles.allergenName, { color: headerTextColor }]}>
                 {item.allergen}
               </Text>
               {!item.isExpanded && (
-                <Text style={[styles.allergenSummary, { 
-                  color: isDark ? 'rgba(255,255,255,0.7)' : `${item.color}99` 
-                }]}>
+                <Text style={[styles.allergenSummary, { color: headerSummaryColor }]}>
                   {displayFoods.length} foods • {getCollapsedSummary(displayFoods)}
                 </Text>
               )}
             </View>
           </View>
-          
-          <Animated.View style={{ 
-            transform: [{ rotate: item.isExpanded ? '180deg' : '0deg' }] 
+
+          <Animated.View style={{
+            transform: [{ rotate: item.isExpanded ? '180deg' : '0deg' }]
           }}>
-            <Ionicons 
-              name="chevron-down" 
-              size={24} 
-              color={isDark ? '#FFF' : item.color} 
+            <Ionicons
+              name="chevron-down"
+              size={24}
+              color={headerTextColor}
             />
           </Animated.View>
         </LinearGradient>
       </TouchableOpacity>
-      
+
       {item.isExpanded && (
         <View style={[styles.allergenContent, { backgroundColor: theme.card }]}>
-          {/* Related Foods */}
           <View style={styles.relatedFoods}>
             {displayFoods.map((food, foodIndex) => (
               <View key={foodIndex} style={styles.relatedFood}>
@@ -536,18 +538,18 @@ function AllergenCard({
                     {food.name}
                   </Text>
                 </View>
-                
+
                 <View style={styles.relatedFoodRight}>
                   <View style={styles.percentageBarContainer}>
                     <View style={[styles.percentageBarBg, { backgroundColor: theme.border }]}>
-                      <View 
+                      <View
                         style={[
                           styles.percentageBarFill,
-                          { 
+                          {
                             width: `${food.percentage}%`,
                             backgroundColor: getRiskColor(food.riskLevel),
                           }
-                        ]} 
+                        ]}
                       />
                     </View>
                     <Text style={[styles.percentageText, { color: theme.textPrimary }]}>
@@ -558,9 +560,8 @@ function AllergenCard({
               </View>
             ))}
           </View>
-          
-          {/* Scientific Explanation */}
-          <View style={[styles.infoBox, { backgroundColor: isDark ? '#000' : '#F9FAFB' }]}>
+
+          <View style={[styles.infoBox, { backgroundColor: isDark ? INFO_BOX_BG_DARK : INFO_BOX_BG_LIGHT }]}>
             <View style={styles.infoHeader}>
               <Ionicons name="flask" size={18} color={theme.primary} />
               <Text style={[styles.infoTitle, { color: theme.textPrimary }]}>
@@ -571,8 +572,7 @@ function AllergenCard({
               {item.scientificReason}
             </Text>
           </View>
-          
-          {/* Advice */}
+
           <View style={[styles.adviceBox, { backgroundColor: `${item.color}10` }]}>
             <Ionicons name="bulb" size={18} color={item.color} />
             <Text style={[styles.adviceText, { color: isDark ? theme.textPrimary : item.color }]}>
@@ -585,31 +585,18 @@ function AllergenCard({
   );
 }
 
-// ============================================================================
-// STYLES
-// ============================================================================
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  
-  // LOADING & ERROR
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: 40 },
+
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 16,
   },
-  loadingText: {
-    fontSize: 16,
-  },
+  loadingText: { fontSize: 16 },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -633,12 +620,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   retryButtonText: {
-    color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
   },
-  
-  // EMPTY
+
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -661,8 +646,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
-  
-  // HEADER
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -679,8 +663,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
   },
-  
-  // SECTIONS
+
   section: {
     paddingHorizontal: 24,
     marginBottom: 20,
@@ -695,8 +678,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 16,
   },
-  
-  // COLLAPSIBLE ALLERGIES
+
   allergiesToggle: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -747,7 +729,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // FILTER TABS
   filterContainer: {
     flexDirection: 'row',
     borderRadius: 16,
@@ -783,7 +764,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // NO RESULTS
   noResultsCard: {
     padding: 32,
     borderRadius: 16,
@@ -794,8 +774,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  
-  // ALLERGEN CARDS
+
   allergenCard: {
     marginBottom: 12,
     borderRadius: 16,
@@ -827,8 +806,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 2,
   },
-  
-  // ALLERGEN CONTENT
+
   allergenContent: {
     padding: 16,
     gap: 16,
@@ -881,8 +859,7 @@ const styles = StyleSheet.create({
     width: 36,
     textAlign: 'right',
   },
-  
-  // INFO BOX
+
   infoBox: {
     padding: 14,
     borderRadius: 12,
@@ -901,8 +878,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  
-  // ADVICE BOX
+
   adviceBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -916,8 +892,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 18,
   },
-  
-  // FOOTER
+
   footerCard: {
     marginHorizontal: 24,
     padding: 16,

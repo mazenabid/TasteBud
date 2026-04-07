@@ -9,6 +9,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../theme/ThemeContext";
 
+// Always-white button text sits on theme.primary which is near-black in both modes
+const BUTTON_TEXT_ON_PRIMARY = "#FFFFFF";
+
 interface ExportInfoProps {
   visible: boolean;
   onClose: () => void;
@@ -27,7 +30,7 @@ export function ExportInfo({ visible, onClose }: ExportInfoProps) {
       <TouchableOpacity
         style={styles.modalBackdrop}
         activeOpacity={1}
-        onPress={onClose} 
+        onPress={onClose}
       >
         <View
           style={[styles.modalContainer, { backgroundColor: theme.card }]}
@@ -51,7 +54,9 @@ export function ExportInfo({ visible, onClose }: ExportInfoProps) {
             style={[styles.modalButton, { backgroundColor: theme.primary }]}
             onPress={onClose}
           >
-            <Text style={{ color: "#fff", fontWeight: "700" }}>OK</Text>
+            <Text style={{ color: BUTTON_TEXT_ON_PRIMARY, fontWeight: "700" }}>
+              OK
+            </Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>

@@ -171,7 +171,7 @@ export function ProfileScreen({
               Your Allergies
             </Text>
             <TouchableOpacity onPress={onEditAllergies}>
-              <Text style={[styles.editLink, { color: theme.primary }]}>
+              <Text style={[styles.editLink, { color: theme.textPrimary }]}>
                 Edit
               </Text>
             </TouchableOpacity>
@@ -229,7 +229,7 @@ export function ProfileScreen({
               <Switch
                 value={notifications.mealReminders}
                 onValueChange={() => handleToggleNotification("mealReminders")}
-                trackColor={{ false: "#D1D5DB", true: theme.primary }}
+                trackColor={{ false: theme.border, true: theme.textPrimary }}
                 thumbColor="#FFF"
               />
             </View>
@@ -252,7 +252,7 @@ export function ProfileScreen({
               <Switch
                 value={notifications.reactionAlerts}
                 onValueChange={() => handleToggleNotification("reactionAlerts")}
-                trackColor={{ false: "#D1D5DB", true: theme.primary }}
+                trackColor={{ false: theme.border, true: theme.textPrimary }}
                 thumbColor="#FFF"
               />
             </View>
@@ -275,7 +275,7 @@ export function ProfileScreen({
               <Switch
                 value={notifications.weeklyReports}
                 onValueChange={() => handleToggleNotification("weeklyReports")}
-                trackColor={{ false: "#D1D5DB", true: theme.primary }}
+                trackColor={{ false: theme.border, true: theme.textPrimary }}
                 thumbColor="#FFF"
               />
             </View>

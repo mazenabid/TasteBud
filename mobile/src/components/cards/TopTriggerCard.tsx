@@ -8,6 +8,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
 
+const ACCENT_DEEP_RED = '#7F1D1D';
+const ACCENT_MEDIUM_RED = '#991B1B';
+const ACCENT_AMBER = '#D97706';
+const ACCENT_AMBER_BRIGHT = '#FCD34D';
+const HERO_TEXT_ON_DARK = '#FFFFFF';
+
 interface TopTrigger {
   food: string;
   appearances: number;
@@ -24,13 +30,29 @@ export function TopTriggerCard({
   theme: any;
   isDark: boolean;
 }) {
-  // Severity ring calculations
   const size = 100;
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const severityPercent = (topTrigger.avgSeverity / 10) * 100;
-  const strokeDashoffset = circumference - (severityPercent / 100) * circumference;
+  const strokeDashoffset =
+    circumference - (severityPercent / 100) * circumference;
+
+  const titleColor = isDark ? HERO_TEXT_ON_DARK : ACCENT_DEEP_RED;
+  const subtitleColor = isDark
+    ? 'rgba(255,255,255,0.9)'
+    : ACCENT_MEDIUM_RED;
+  const ringStrokeBg = isDark
+    ? 'rgba(0,0,0,0.2)'
+    : 'rgba(127,29,29,0.15)';
+  const ringStrokeFg = isDark ? HERO_TEXT_ON_DARK : ACCENT_DEEP_RED;
+  const badgeBg = isDark
+    ? 'rgba(0,0,0,0.25)'
+    : 'rgba(127,29,29,0.1)';
+  const iconColor = isDark ? ACCENT_AMBER_BRIGHT : ACCENT_AMBER;
+  const recommendationBg = isDark
+    ? 'rgba(0,0,0,0.25)'
+    : 'rgba(127,29,29,0.12)';
 
   return (
     <View style={styles.section}>
@@ -44,31 +66,26 @@ export function TopTriggerCard({
         end={{ x: 1, y: 1 }}
         style={styles.heroCard}
       >
-        {/* Decorative background circles */}
         <View style={styles.decorCircle1} />
         <View style={styles.decorCircle2} />
 
         <View style={styles.heroContent}>
-          {/* Top row: Severity ring + Food info */}
           <View style={styles.topRow}>
-            {/* Severity Ring */}
             <View style={styles.ringContainer}>
               <Svg width={size} height={size} style={styles.svg}>
-                {/* Background circle */}
                 <Circle
                   cx={size / 2}
                   cy={size / 2}
                   r={radius}
-                  stroke={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(127,29,29,0.15)'}
+                  stroke={ringStrokeBg}
                   strokeWidth={strokeWidth}
                   fill="transparent"
                 />
-                {/* Progress circle */}
                 <Circle
                   cx={size / 2}
                   cy={size / 2}
                   r={radius}
-                  stroke={isDark ? '#FFF' : '#7F1D1D'}
+                  stroke={ringStrokeFg}
                   strokeWidth={strokeWidth}
                   fill="transparent"
                   strokeDasharray={circumference}
@@ -79,40 +96,34 @@ export function TopTriggerCard({
                 />
               </Svg>
               <View style={styles.ringCenter}>
-                <Text style={[styles.ringValue, { color: isDark ? '#FFF' : '#7F1D1D' }]}>
+                <Text style={[styles.ringValue, { color: titleColor }]}>
                   {topTrigger.avgSeverity.toFixed(1)}
                 </Text>
-                <Text style={[styles.ringLabel, { color: isDark ? 'rgba(255,255,255,0.8)' : '#991B1B' }]}>
+                <Text style={[styles.ringLabel, { color: subtitleColor }]}>
                   /10
                 </Text>
               </View>
             </View>
 
-            {/* Food info */}
             <View style={styles.foodInfo}>
-              <Text style={[styles.heroFoodName, { color: isDark ? '#FFF' : '#7F1D1D' }]}>
+              <Text style={[styles.heroFoodName, { color: titleColor }]}>
                 {topTrigger.food}
               </Text>
-              <Text style={[styles.heroStats, { color: isDark ? 'rgba(255,255,255,0.9)' : '#991B1B' }]}>
+              <Text style={[styles.heroStats, { color: subtitleColor }]}>
                 {topTrigger.appearances} symptomatic meals
               </Text>
-              <View style={[styles.severityBadge, { backgroundColor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(127,29,29,0.1)' }]}>
-                <Ionicons 
-                  name="warning" 
-                  size={14} 
-                  color={isDark ? '#FCD34D' : '#D97706'} 
-                />
-                <Text style={[styles.severityText, { color: isDark ? '#FFF' : '#7F1D1D' }]}>
+              <View style={[styles.severityBadge, { backgroundColor: badgeBg }]}>
+                <Ionicons name="warning" size={14} color={iconColor} />
+                <Text style={[styles.severityText, { color: titleColor }]}>
                   High correlation
                 </Text>
               </View>
             </View>
           </View>
 
-          {/* Recommendation */}
-          <View style={[styles.recommendation, { backgroundColor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(127,29,29,0.12)' }]}>
-            <Ionicons name="bulb" size={18} color={isDark ? '#FCD34D' : '#D97706'} />
-            <Text style={[styles.recommendationText, { color: isDark ? '#FFF' : '#7F1D1D' }]}>
+          <View style={[styles.recommendation, { backgroundColor: recommendationBg }]}>
+            <Ionicons name="bulb" size={18} color={iconColor} />
+            <Text style={[styles.recommendationText, { color: titleColor }]}>
               Try avoiding {topTrigger.food.toLowerCase()} for 1 week to test
             </Text>
           </View>
@@ -138,7 +149,6 @@ const styles = StyleSheet.create({
     padding: 20,
     overflow: 'hidden',
   },
-  // Decorative circles
   decorCircle1: {
     position: 'absolute',
     top: -30,

@@ -1,25 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Modal,
-  ActivityIndicator,
-  Alert,
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../theme/ThemeContext';
-import { useUnsafeFoods } from '../../hooks/useUnsafeFoods';
-import { useSearchFoods } from '../../hooks/useSearchFoods';
-import { useSuspectedFoods } from '../../hooks/useSuspectedFoods';
-import api from '../../services/apiClient';
-
 
 export function CollapsibleSection({
   title,
@@ -44,7 +30,7 @@ export function CollapsibleSection({
 }) {
   return (
     <View style={styles.section}>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.sectionHeader, { backgroundColor: theme.card }]}
         onPress={onToggle}
         activeOpacity={0.7}
@@ -56,19 +42,19 @@ export function CollapsibleSection({
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             {title}
           </Text>
-          <View style={[styles.sectionCount, { backgroundColor: isDark ? '#2c2c2e' : '#e5e5e5' }]}>
+          <View style={[styles.sectionCount, { backgroundColor: theme.border }]}>
             <Text style={[styles.sectionCountText, { color: theme.textSecondary }]}>
               {count}
             </Text>
           </View>
         </View>
-        <Ionicons 
-          name={isExpanded ? "chevron-up" : "chevron-down"} 
-          size={20} 
-          color={theme.textSecondary} 
+        <Ionicons
+          name={isExpanded ? "chevron-up" : "chevron-down"}
+          size={20}
+          color={theme.textSecondary}
         />
       </TouchableOpacity>
-      
+
       {isExpanded && (
         <View style={styles.sectionContent}>
           {children}
@@ -79,7 +65,7 @@ export function CollapsibleSection({
 }
 
 const styles = StyleSheet.create({
-     section: { marginBottom: 20 },
+  section: { marginBottom: 20 },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',

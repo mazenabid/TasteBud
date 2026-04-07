@@ -6,6 +6,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 
+const SYMPTOM_CARD_BG_DARK = "#000000";
+const SYMPTOM_CARD_BG_LIGHT = "#1F2937";
+const SYMPTOM_CARD_TEXT = "#FFFFFF";
+const SYMPTOM_CARD_TEXT_MUTED = "rgba(255,255,255,0.7)";
+
+const UNSAFE_BORDER = "#FCD34D";
+
 interface Meal {
   id: string;
   name: string;
@@ -30,18 +37,20 @@ export function MealDetailCard({
   theme: any;
   isDark: boolean;
 }) {
-  // Logic for the top 5
   const displayedIngredients = meal.ingredients.slice(0, 5);
   const remainingIngredients = meal.ingredients.length - 5;
 
   const displayedUnsafe = meal.unsafeIngredients.slice(0, 5);
   const remainingUnsafe = meal.unsafeIngredients.length - 5;
 
+  const tagBg = isDark ? "rgba(255,255,255,0.1)" : theme.card;
+  const symptomCardBg = isDark ? SYMPTOM_CARD_BG_DARK : SYMPTOM_CARD_BG_LIGHT;
+
   return (
     <View
       style={[
         styles.mealDetailCard,
-        { backgroundColor: isDark ? "#1C1C1E" : "#F9FAFB" },
+        { backgroundColor: theme.card },
       ]}
     >
       <View style={[styles.mealColorBar, { backgroundColor: meal.color }]} />
@@ -81,7 +90,7 @@ export function MealDetailCard({
               style={[
                 styles.tag,
                 {
-                  backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#FFF",
+                  backgroundColor: tagBg,
                   borderColor: theme.border,
                 },
               ]}
@@ -112,13 +121,13 @@ export function MealDetailCard({
               key={index}
               style={[
                 styles.symptomCard,
-                { backgroundColor: isDark ? "#000" : "#1F2937" },
+                { backgroundColor: symptomCardBg },
               ]}
             >
-              <Text style={[styles.symptomName, { color: "#FFF" }]}>
+              <Text style={[styles.symptomName, { color: SYMPTOM_CARD_TEXT }]}>
                 {symptom.name}
               </Text>
-              <Text style={[styles.symptomDetails, { color: "rgba(255,255,255,0.7)" }]}>
+              <Text style={[styles.symptomDetails, { color: SYMPTOM_CARD_TEXT_MUTED }]}>
                 Severity: {symptom.severity}/10 at {symptom.time}
               </Text>
             </View>
@@ -143,17 +152,17 @@ export function MealDetailCard({
                 style={[
                   styles.tag,
                   styles.unsafeTag,
-                  { borderColor: "#FCD34D" },
+                  { borderColor: UNSAFE_BORDER },
                 ]}
               >
-                <Text style={[styles.tagText, { color: "#F59E0B" }]}>
+                <Text style={[styles.tagText, { color: theme.warning }]}>
                   {ingredient}
                 </Text>
               </View>
             ))}
             {remainingUnsafe > 0 && (
-              <View style={[styles.tag, styles.unsafeTag, { borderColor: "#FCD34D", borderStyle: 'dashed' }]}>
-                <Text style={[styles.tagText, { color: "#F59E0B" }]}>
+              <View style={[styles.tag, styles.unsafeTag, { borderColor: UNSAFE_BORDER, borderStyle: 'dashed' }]}>
+                <Text style={[styles.tagText, { color: theme.warning }]}>
                   +{remainingUnsafe} more
                 </Text>
               </View>

@@ -1,22 +1,16 @@
-/**
- * FeatureCard - Priority feature card
- */
-
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
   Animated,
-  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../theme/ThemeContext";
+
+// Always-white text/icon for dark-mode feature cards (sits on saturated colored bg)
+const FOREGROUND_ON_DARK = "#FFFFFF";
 
 export function FeatureCard({
   icon,
@@ -35,6 +29,7 @@ export function FeatureCard({
   onPress: () => void;
   isDark: boolean;
 }) {
+  const { theme } = useTheme();
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -55,6 +50,14 @@ export function FeatureCard({
     }).start();
   };
 
+  const foregroundColor = isDark ? FOREGROUND_ON_DARK : theme.textPrimary;
+  const foregroundColorMuted = isDark
+    ? "rgba(255,255,255,0.8)"
+    : "rgba(0,0,0,0.6)";
+  const foregroundColorFaint = isDark
+    ? "rgba(255,255,255,0.3)"
+    : "rgba(0,0,0,0.2)";
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -73,23 +76,27 @@ export function FeatureCard({
         ]}
       >
         <View style={styles.featureIcon}>
-          <Ionicons
-            name={icon}
-            size={28}
-            color={isDark ? "#FFF" : "rgba(0,0,0,0.7)"}
-          />
+          <Ionicons name={icon} size={28} color={foregroundColor} />
         </View>
-        <Text
-          style={[
-            styles.featureTitle,
-            { color: isDark ? "#FFF" : "rgba(0,0,0,0.9)" },
-          ]}
-        >
+        <Text style={[styles.featureTitle, { color: foregroundColor }]}>
           {title}
         </Text>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={[styles.featureValue, { color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.6)" }]}>{value}</Text>
-          <Ionicons name="chevron-forward" size={14} style={{ marginTop: 5 }} color={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.2)"} />
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text style={[styles.featureValue, { color: foregroundColorMuted }]}>
+            {value}
+          </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={14}
+            style={{ marginTop: 5 }}
+            color={foregroundColorFaint}
+          />
         </View>
       </Animated.View>
     </TouchableOpacity>

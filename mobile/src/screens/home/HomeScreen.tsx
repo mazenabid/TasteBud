@@ -20,12 +20,28 @@ import { FoodLibraryCard } from "../../components/cards/FoodLibraryCard";
 
 import { useMealLogDailyStats } from "../../hooks/useMealLogDailyStats";
 
+// Avatar accent colors — friendly indigo, distinct from semantic palette
+const AVATAR_BG_LIGHT = "#E0E7FF";
+const AVATAR_BG_DARK = "#4A90E2";
+const AVATAR_TEXT_LIGHT = "#6366F1";
+const AVATAR_TEXT_DARK = "#FFFFFF";
+
+// FeatureCard accent palettes (intentional per-feature aesthetic choices)
+const FEATURE_PURPLE_LIGHT = "#C4B5FD";
+const FEATURE_PURPLE_DARK = "#7C3AED";
+const FEATURE_ORANGE_LIGHT = "#FED7AA";
+const FEATURE_ORANGE_DARK = "#F97316";
+
+// Always-white text on saturated buttons
+const BUTTON_TEXT_ON_PRIMARY = "#FFFFFF";
+
 interface HomeScreenProps {
   userName: string;
   onNavigate: (screen: string) => void;
 }
 
 const { width } = Dimensions.get("window");
+
 export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
   const { theme, isDark } = useTheme();
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -52,16 +68,10 @@ export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
 
   if (loading) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.background }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text style={{ color: theme.textSecondary, fontSize: 16 }}>
-            Loading...
-          </Text>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Text style={{ color: theme.textSecondary, fontSize: 16 }}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -69,36 +79,13 @@ export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
 
   if (error) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.background }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 24,
-          }}
-        >
-          <Text
-            style={{
-              color: theme.danger,
-              fontSize: 18,
-              fontWeight: "600",
-              marginBottom: 8,
-            }}
-          >
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
+          <Text style={{ color: theme.danger, fontSize: 18, fontWeight: "600", marginBottom: 8 }}>
             Oops!
           </Text>
-          <Text
-            style={{
-              color: theme.textSecondary,
-              fontSize: 14,
-              textAlign: "center",
-              marginBottom: 16,
-            }}
-          >
+          <Text style={{ color: theme.textSecondary, fontSize: 14, textAlign: "center", marginBottom: 16 }}>
             {error}
           </Text>
           <TouchableOpacity
@@ -110,7 +97,7 @@ export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
               borderRadius: 8,
             }}
           >
-            <Text style={{ color: "#FFF", fontWeight: "600" }}>Try Again</Text>
+            <Text style={{ color: BUTTON_TEXT_ON_PRIMARY, fontWeight: "600" }}>Try Again</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -118,9 +105,7 @@ export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <ScrollView
@@ -133,13 +118,13 @@ export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
           <View
             style={[
               styles.profilePic,
-              { backgroundColor: isDark ? "#4A90E2" : "#E0E7FF" },
+              { backgroundColor: isDark ? AVATAR_BG_DARK : AVATAR_BG_LIGHT },
             ]}
           >
             <Text
               style={[
                 styles.profileInitial,
-                { color: isDark ? "#FFF" : "#6366F1" },
+                { color: isDark ? AVATAR_TEXT_DARK : AVATAR_TEXT_LIGHT },
               ]}
             >
               {userName.charAt(0).toUpperCase()}
@@ -184,9 +169,9 @@ export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
             This week
           </Text>
           <WeekCalendar
-          onAddMeal={() => onNavigate("addMeal")}
-          theme={theme}
-        />
+            onAddMeal={() => onNavigate("addMeal")}
+            theme={theme}
+          />
         </View>
 
         {/* PRIORITY FEATURES GRID */}
@@ -195,35 +180,27 @@ export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
             Track & Analyze
           </Text>
 
-          {/* Row 1: Symptom Analysis + Cross Reactive */}
           <View style={styles.featuresRow}>
             <FeatureCard
               icon="pulse-outline"
               title="Symptom Analysis"
-              value={
-                stats.reacCount > 0 ? `${stats.reacCount} today` : "No symptoms"
-              }
-              color="#C4B5FD"
-              darkColor="#7C3AED"
+              value={stats.reacCount > 0 ? `${stats.reacCount} today` : "No symptoms"}
+              color={FEATURE_PURPLE_LIGHT}
+              darkColor={FEATURE_PURPLE_DARK}
               onPress={() => onNavigate("symptomAnalysis")}
               isDark={isDark}
             />
             <FeatureCard
               icon="git-network-outline"
               title="Cross Reactive"
-              value={
-                stats.crossReactiveCount > 0
-                  ? `${stats.crossReactiveCount} foods`
-                  : "Check foods"
-              }
-              color="#FED7AA"
-              darkColor="#F97316"
+              value={stats.crossReactiveCount > 0 ? `${stats.crossReactiveCount} foods` : "Check foods"}
+              color={FEATURE_ORANGE_LIGHT}
+              darkColor={FEATURE_ORANGE_DARK}
               onPress={() => onNavigate("crossReactivity")}
               isDark={isDark}
             />
           </View>
 
-          {/* Row 2: Food Library (full width) */}
           <FoodLibraryCard
             unsafeFoodsCount={stats.unsafeFoodsCount}
             onPress={() => onNavigate("foodLibrary")}
@@ -232,51 +209,16 @@ export function HomeScreen({ userName, onNavigate }: HomeScreenProps) {
           />
         </View>
 
-        {/* SECONDARY: Nutrition Stats (if available) 
-        <View style={styles.statsSection}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-            Nutrition today
-          </Text>
-          <View style={styles.statsRow}>
-            <NutritionCard
-              icon="flame-outline"
-              label="Protein"
-              value={stats.proteinGrams.toString()}
-              unit="g"
-              color="#C4B5FD"
-              isDark={isDark}
-            />
-            <NutritionCard
-              icon="nutrition-outline"
-              label="Carbs"
-              value={stats.carbsGrams.toString()}
-              unit="g"
-              color="#FDE68A"
-              isDark={isDark}
-            />
-          </View>
-        </View>*/}
-
-        {/* Bottom padding for tab bar */}
         <View style={{ height: 120 }} />
       </ScrollView>
-
-      {/* Polished Tab Bar */}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  // HEADER
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: 40 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -302,7 +244,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  // GREETING
   greetingSection: {
     paddingHorizontal: 24,
     marginBottom: 24,
@@ -317,13 +258,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: -0.5,
   },
-
-  // HERO CARD
   heroSection: {
     paddingHorizontal: 24,
     marginBottom: 32,
   },
-  // WEEK CALENDAR
   weekSection: {
     paddingHorizontal: 24,
     marginBottom: 32,
@@ -334,7 +272,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     letterSpacing: -0.3,
   },
-  // FEATURES SECTION
   featuresSection: {
     paddingHorizontal: 24,
     marginBottom: 32,
@@ -343,14 +280,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     marginBottom: 12,
-  },
-  // NUTRITION STATS
-  statsSection: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  statsRow: {
-    flexDirection: "row",
-    gap: 12,
   },
 });

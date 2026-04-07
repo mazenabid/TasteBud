@@ -95,14 +95,17 @@ export function DayLogCard({
       {dayLog.dayNumber}
     </Text>
   </View>
-  <View style={{ flex: 0 }}>
-    <Text style={[styles.dayName, { color: isToday ? theme.todayLabelText : theme.textPrimary }]}>
-      {dayLog.dayName}
-    </Text>
-    {isToday && (
-      <Text style={[styles.todayLabel, { color: theme.todayLabelText }]}>Today</Text>            
-    )}
-  </View>
+  <View style={{ flexShrink: 1 }}>
+  <Text
+    numberOfLines={1}
+    style={[styles.dayName, { color: isToday ? theme.todayLabelText : theme.textPrimary }]}
+  >
+    {dayLog.dayName}
+  </Text>
+  {isToday && (
+    <Text style={[styles.todayLabel, { color: theme.todayLabelText }]}>Today</Text>
+  )}
+</View>
 </View>
         
         <View style={styles.headerRight}>

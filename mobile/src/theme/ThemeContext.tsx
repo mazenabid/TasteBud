@@ -33,7 +33,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       if (nextAppState === 'active') {
         const scheme = Appearance.getColorScheme();
-        console.log('📱 App active, current scheme:', scheme);
         setCurrentColorScheme(scheme);
       }
     };

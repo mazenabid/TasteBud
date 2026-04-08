@@ -30,7 +30,7 @@ export function ProfileScreen({
   onSignOut,
   onViewTutorial,
 }: ProfileScreenProps) {
-  const { theme, isDark } = useTheme();
+  const { theme, isDark, mode, setMode } = useTheme();
   const { user } = useAuth();
   const [profile] = useState({
     name: `${user.firstName} ${user.lastName}`,
@@ -58,9 +58,7 @@ export function ProfileScreen({
       [key]: !prev[key as keyof typeof notifications],
     }));
   };
-  console.log("reached");
   const handleExportData = async () => {
-    console.log("starting export");
     setExportModalVisible(true);
     try {
       await getMonthlyReport(year, month);
@@ -281,6 +279,66 @@ export function ProfileScreen({
             </View>
           </View>
         </View>
+
+        {/* Appearance */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+            Appearance
+          </Text>
+
+          <View style={[styles.card, { backgroundColor: theme.card }]}>
+            <View style={styles.appearanceRow}>
+              {(["auto", "light", "dark"] as const).map((option) => {
+                const isSelected = mode === option;
+                const labels = {
+                  auto: "Auto",
+                  light: "Light",
+                  dark: "Dark",
+                };
+                const icons = {
+                  auto: "phone-portrait-outline",
+                  light: "sunny-outline",
+                  dark: "moon-outline",
+                } as const;
+
+                return (
+                  <TouchableOpacity
+                    key={option}
+                    onPress={() => setMode(option)}
+                    style={[
+                      styles.appearancePill,
+                      {
+                        backgroundColor: isSelected
+                          ? theme.textPrimary
+                          : "transparent",
+                        borderColor: isSelected ? theme.textPrimary : theme.border,
+                      },
+                    ]}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons
+                      name={icons[option]}
+                      size={18}
+                      color={isSelected ? theme.card : theme.textPrimary}
+                    />
+                    <Text
+                      style={[
+                        styles.appearancePillText,
+                        {
+                          color: isSelected ? theme.card : theme.textPrimary,
+                        },
+                      ]}
+                    >
+                      {labels[option]}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+
+        {/* More Options */}
 
         {/* More Options */}
         <View style={styles.section}>
@@ -567,6 +625,26 @@ const styles = StyleSheet.create({
   },
   settingText: {
     fontSize: 16,
+    fontWeight: "600",
+  },
+
+  // APPEARANCE
+  appearanceRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  appearancePill: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  appearancePillText: {
+    fontSize: 14,
     fontWeight: "600",
   },
 

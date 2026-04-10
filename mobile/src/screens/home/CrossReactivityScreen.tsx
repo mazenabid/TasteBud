@@ -247,7 +247,7 @@ export function CrossReactivityScreen({ onBack }: CrossReactivityScreenProps) {
               No cross-reactions found
             </Text>
             <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
-              Great news! We couldn't find any significant cross-reactive foods for your tracked allergies.
+              Make sure you've logged at least 3 meals so we have enough data to find patterns.
             </Text>
           </View>
         </ScrollView>

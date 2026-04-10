@@ -142,7 +142,7 @@ const testAllergenDetection = async (userId) => {
 const getSuspectedFoods = async (userId) => {
     const meals = await MealLog.find({ userId }).sort({ createdAt: 1 }).lean();
     if (meals.length < 3) {
-        return [];
+        return { needsMoreData: true, mealsLogged: meals.length, mealsRequired: 3, suspectedFoods: [] };
     }
 
     const ingredientStats = await extractIngredientReactionStats(userId);
@@ -159,7 +159,7 @@ const getSuspectedFoods = async (userId) => {
 
     const suspectedFoods = [...igEResults, ...filteredFodmap, ...filteredIntolerance];
     await syncSuspectedToUnsafeFoods(userId, suspectedFoods);
-    return suspectedFoods;
+    return { needsMoreData: false, mealsLogged: meals.length, mealsRequired: 3, suspectedFoods };
 };
 
 async function syncSuspectedToUnsafeFoods(userId, suspectedFoods) {

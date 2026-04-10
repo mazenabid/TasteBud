@@ -134,20 +134,38 @@ export function SymptomAnalysisScreen({ onBack }: SymptomAnalysisScreenProps) {
   const hasData = topTriggers.length > 0 || dayData.some(d => d.totalMeals > 0);
 
   if (!hasData && !chartLoading) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-        <Header onBack={onBack} theme={theme} />
-        <View style={styles.centerContent}>
-          <Text style={styles.emptyEmoji}>📊</Text>
-          <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>No data yet</Text>
-          <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
-            Log meals and track reactions to see your symptom analysis here.
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const needsMore = (topTriggers as any).needsMoreData;
+  const logged = (topTriggers as any).mealsLogged || 0;
+  const required = 3;
+  
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <Header onBack={onBack} theme={theme} />
+      <View style={styles.centerContent}>
+        <Ionicons name="restaurant-outline" size={56} color={theme.textTertiary} />
+        <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>
+          {logged < required ? "Almost there!" : "No patterns yet"}
+        </Text>
+        <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
+          {logged < required
+            ? `Log ${required - logged} more meal${required - logged !== 1 ? "s" : ""} to start detecting patterns. You've logged ${logged} of ${required}.`
+            : "Keep logging meals — once we see consistent patterns between foods and symptoms, we'll show them here."}
+        </Text>
+        {logged < required && (
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+            {[1, 2, 3].map(n => (
+              <View key={n} style={{
+                width: 40, height: 6, borderRadius: 3,
+                backgroundColor: n <= logged ? theme.success : theme.border
+              }} />
+            ))}
+          </View>
+        )}
+      </View>
+    </SafeAreaView>
+  );
+}
 
   const triggersByTrack: Record<string, Trigger[]> = {};
   topTriggers.forEach((t) => {

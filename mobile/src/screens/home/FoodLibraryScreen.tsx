@@ -37,7 +37,8 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
   });
 
   const { data: unsafeFoodsData, isLoading, error, refetch } = useUnsafeFoods();
-  const { data: suspectedData } = useSuspectedFoods();
+  const { data: suspectedRaw } = useSuspectedFoods();
+  const suspectedData = Array.isArray(suspectedRaw) ? suspectedRaw : suspectedRaw?.suspectedFoods || [];
 
   const { safeFoods, suspectedFoods, confirmedFoods } = useMemo(() => {
     const safe: Food[] = [];

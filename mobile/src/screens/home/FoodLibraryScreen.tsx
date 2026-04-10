@@ -150,13 +150,13 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
           <TouchableOpacity
             style={[
               styles.tabSelectorButton,
-              mainTab === 'my_foods' && { backgroundColor: theme.card }
+              mainTab === 'my_foods' && { backgroundColor: theme.textPrimary }
             ]}
             onPress={() => setMainTab('my_foods')}
           >
             <Text style={[
               styles.tabSelectorText,
-              { color: mainTab === 'my_foods' ? theme.textPrimary : theme.textSecondary }
+              { color: mainTab === 'my_foods' ? theme.background : theme.textSecondary }
             ]}>
               My Foods
             </Text>
@@ -164,14 +164,14 @@ export function FoodLibraryScreen({ onBack }: FoodLibraryScreenProps) {
           <TouchableOpacity
             style={[
               styles.tabSelectorButton,
-              mainTab === 'browse' && { backgroundColor: theme.card }
+              mainTab === 'browse' && { backgroundColor: theme.textPrimary }
             ]}
             onPress={() => setMainTab('browse')}
           >
             <Text style={[
               styles.tabSelectorText,
-              { color: mainTab === 'browse' ? theme.textPrimary : theme.textSecondary }
-            ]}>
+              { color: mainTab === 'browse' ? theme.background : theme.textSecondary }    
+              ]}>
               Browse All
             </Text>
           </TouchableOpacity>

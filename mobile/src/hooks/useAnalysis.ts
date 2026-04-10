@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext} from "react";
 import { reactionService, MonthlyAnalysis } from "../services/reactionService";
-import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 export interface Trigger {

@@ -33,7 +33,7 @@ export function ProfileScreen({
   const { theme, isDark, mode, setMode } = useTheme();
   const { user } = useAuth();
   const [totalMeals, setTotalMeals] = useState(0);
-  const [symptomFreeDays, setSymptomFreeDays] = useState(0);
+  const [setSymptomFreeDays] = useState(0);
   const memberSince = user?.dateJoined || user?.createdAt || "2025-12-15";
   useEffect(() => {
     const fetchStats = async () => {
@@ -51,7 +51,6 @@ export function ProfileScreen({
         const safeDays = Object.values(dayMap).filter(
           (d) => d.meals > 0 && d.reactions === 0
         ).length;
-        setSymptomFreeDays(safeDays);
       } catch (err) {
         console.error("Failed to fetch profile stats:", err);
       }

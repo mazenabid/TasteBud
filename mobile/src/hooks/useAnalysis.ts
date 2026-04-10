@@ -51,7 +51,7 @@ export function useAnalysis() {
       const month = now.getMonth() + 1;
 
       const reacRes = await reactionService.getTopTriggerFoods(userId);
-      const triggers = reacRes.data;
+      const triggers = reacRes.data?.suspectedFoods || reacRes.data;
 
       if (triggers && Array.isArray(triggers) && triggers.length > 0) {
         const top: TopTrigger = {

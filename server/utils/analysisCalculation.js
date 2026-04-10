@@ -36,15 +36,18 @@ const getTimeWindowScore = (hours, track) => {
       return 0.5;
   }
 };
+
 const getSeverityMultiplier = (severity) => {
-  if (severity >= 9) return 2.0;
-  if (severity >= 7) return 1.5;
-  if (severity >= 4) return 1.0;
-  return 0.5;
+  if (severity >= 5) return 2.0;   // Grade 5: life-threatening
+  if (severity >= 4) return 1.5;   // Grade 4: severe
+  if (severity >= 3) return 1.2;   // Grade 3: multi-system
+  if (severity >= 2) return 1.0;   // Grade 2: moderate
+  return 0.5;                      // Grade 1: mild
 };
+
 const calculateReactionScore = (symptoms, symptomMap) => {
     return symptoms.reduce((total, s) => {
-        const info = symptomMap[s.id?.toString()]; // <-- FIXED
+        const info = symptomMap[s.id?.toString()];
         const baseWeight = info?.weight || 1;
         const severityMultiplier = getSeverityMultiplier(s.severity);
         return total + (baseWeight * severityMultiplier);

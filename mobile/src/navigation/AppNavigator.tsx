@@ -136,7 +136,7 @@ function MainTabNavigator({
         <LiquidGlassTabBar
           tabs={tabs}
           selectedTab={props.state.routes[props.state.index].name}
-          onTabPress={(tabId) => props.navigation.navigate(tabId)}
+          onTabPress={(tabId, params) => props.navigation.navigate(tabId, params)}
         />
       )}
       screenOptions={{

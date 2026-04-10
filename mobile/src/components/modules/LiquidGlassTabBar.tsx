@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -22,15 +21,12 @@ interface Tab {
 interface LiquidGlassTabBarProps {
   tabs: Tab[];
   selectedTab: string;
-  onTabPress: (tabId: string) => void;
+  onTabPress: (tabId: string, params?: any) => void;
 }
-
-const { width } = Dimensions.get('window');
 
 export function LiquidGlassTabBar({ tabs, selectedTab, onTabPress }: LiquidGlassTabBarProps) {
   const { theme, shadows, isDark } = useTheme();
   const selectedIndex = tabs.findIndex(t => t.id === selectedTab);
-
   const indicatorPosition = useRef(new Animated.Value(selectedIndex)).current;
 
   useEffect(() => {
@@ -41,6 +37,13 @@ export function LiquidGlassTabBar({ tabs, selectedTab, onTabPress }: LiquidGlass
       stiffness: 200,
     }).start();
   }, [selectedIndex]);
+
+  // Build a 5-item array: first 2 tabs, plus button, last 2 tabs
+  const items = [
+    ...tabs.slice(0, 2).map(t => ({ type: 'tab' as const, tab: t })),
+    { type: 'plus' as const, tab: null },
+    ...tabs.slice(2).map(t => ({ type: 'tab' as const, tab: t })),
+  ];
 
   return (
     <View style={[styles.container, shadows.large]}>
@@ -59,14 +62,36 @@ export function LiquidGlassTabBar({ tabs, selectedTab, onTabPress }: LiquidGlass
           style={[styles.gradient, { borderColor: theme.border }]}
         >
           <View style={styles.tabsContainer}>
-            {tabs.map((tab) => (
-              <TabButton
-                key={tab.id}
-                tab={tab}
-                isSelected={tab.id === selectedTab}
-                onPress={() => onTabPress(tab.id)}
-              />
-            ))}
+            {items.map((item, index) => {
+              if (item.type === 'plus') {
+                return (
+                  <TouchableOpacity
+                    key="plus"
+                    onPress={() => onTabPress('MealLog', { startAdding: true })}
+                    activeOpacity={0.7}
+                    style={styles.tabButton}
+                  >
+                    <View style={styles.tabContent}>
+                      <Ionicons
+                        name="add-outline"
+                        size={34}
+                        color={theme.textPrimary}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                );
+              }
+
+              const tab = item.tab!;
+              return (
+                <TabButton
+                  key={tab.id}
+                  tab={tab}
+                  isSelected={tab.id === selectedTab}
+                  onPress={() => onTabPress(tab.id)}
+                />
+              );
+            })}
           </View>
         </LinearGradient>
       </BlurView>
@@ -84,8 +109,6 @@ function TabButton({
   onPress: () => void;
 }) {
   const { theme } = useTheme();
-
-  // theme.textPrimary = white in dark mode, near-black in light mode
   const iconColor = theme.textPrimary;
 
   return (
@@ -131,7 +154,7 @@ const styles = StyleSheet.create({
   tabsContainer: {
     flex: 1,
     flexDirection: 'row',
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
   },
   tabButton: {
     flex: 1,

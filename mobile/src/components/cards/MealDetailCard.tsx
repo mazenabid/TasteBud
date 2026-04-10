@@ -128,7 +128,7 @@ export function MealDetailCard({
                 {symptom.name}
               </Text>
               <Text style={[styles.symptomDetails, { color: SYMPTOM_CARD_TEXT_MUTED }]}>
-                Severity: {symptom.severity}/10 at {symptom.time}
+                Severity: {symptom.severity}/5 at {symptom.time}
               </Text>
             </View>
           ))

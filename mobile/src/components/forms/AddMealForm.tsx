@@ -140,26 +140,24 @@ export function AddMealForm({
 
       setSelectedSymptom(null);
       setSymptomInput("");
-      setSeverity(5);
+      setSeverity(3);
       setSelectedOnset('immediate');
     }
   };
 
   const hasResults = ingredientResults.length > 0 || brandedFoods.length > 0;
 
-  // Severity color: maps to semantic palette where possible
-  // Mild = success, Moderate = warning, Severe = orange (no token), Very Severe = danger
   const getSeverityColor = (sev: number) => {
-    if (sev <= 3) return theme.success;
-    if (sev <= 6) return theme.warning;
-    if (sev <= 8) return SEVERITY_ORANGE;
+    if (sev <= 2) return theme.success;
+    if (sev <= 4) return theme.warning;
+    if (sev <= 5) return SEVERITY_ORANGE;
     return theme.danger;
   };
 
   const getSeverityLabel = (sev: number) => {
-    if (sev <= 3) return "Mild";
-    if (sev <= 6) return "Moderate";
-    if (sev <= 8) return "Severe";
+    if (sev <= 2) return "Mild";
+    if (sev <= 4) return "Moderate";
+    if (sev <= 5) return "Severe";
     return "Very Severe";
   };
 
@@ -444,7 +442,7 @@ export function AddMealForm({
                       <Slider
                         style={styles.slider}
                         minimumValue={1}
-                        maximumValue={10}
+                        maximumValue={5}
                         step={1}
                         value={severity}
                         onValueChange={(val) => setSeverity(val)}
@@ -537,7 +535,7 @@ export function AddMealForm({
                         <Text style={[styles.symptomCardName, { color: SYMPTOM_CARD_TEXT }]}>{symptom.name}</Text>
                         <View style={styles.symptomCardMeta}>
                           <View style={[styles.symptomCardBadge, { backgroundColor: getSeverityColor(symptom.severity) }]}>
-                            <Text style={[styles.symptomCardBadgeText, { color: SYMPTOM_CARD_TEXT }]}>{symptom.severity}/10</Text>
+                            <Text style={[styles.symptomCardBadgeText, { color: SYMPTOM_CARD_TEXT }]}>{symptom.severity}/5</Text>
                           </View>
                           <Text style={[styles.symptomCardTime, { color: SYMPTOM_CARD_TEXT_MUTED }]}>{symptom.time}</Text>
                         </View>

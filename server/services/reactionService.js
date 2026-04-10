@@ -160,9 +160,10 @@ const SYMPTOM_WEIGHTS = {
 };
 
 const getSeverityMultiplier = (severity) => {
-  if (severity >= 9) return 2.0;
-  if (severity >= 7) return 1.5;
-  if (severity >= 4) return 1.0;
+  if (severity >= 5) return 2.0;
+  if (severity >= 4) return 1.5;
+  if (severity >= 3) return 1.2;
+  if (severity >= 2) return 1.0;
   return 0.5;
 };
 

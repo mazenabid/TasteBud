@@ -1,6 +1,6 @@
 const { getTimeWindowScore, calculateReactionScore } = require("../../utils/analysisCalculation");
 
-const detectFODMAPPatterns = (ingredientStats, symptomMap, minAppearances = 5) => {
+const detectFODMAPPatterns = (ingredientStats, symptomMap, minAppearances = 3) => {
     const results = [];
     for (const [ingredientId, stats] of Object.entries(ingredientStats)) {
         if (stats.totalMeals < minAppearances) continue;
@@ -60,7 +60,7 @@ const detectFODMAPPatterns = (ingredientStats, symptomMap, minAppearances = 5) =
             id: stats.ingredientId,
             ingredientName: stats.ingredientName,
             track: "fodmap",
-            trackLabel: "🫃 FODMAP Sensitivity",
+            trackLabel: "FODMAP Sensitivity",
             confidence,
             totalMeals: stats.totalMeals,
             reactionMeals: concordant,

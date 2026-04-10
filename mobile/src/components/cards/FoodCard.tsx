@@ -60,8 +60,8 @@ export function FoodCard({
   const trackInfo = getTrackInfo(food.track);
 
   const getSeverityColor = (severity: number) => {
-    if (severity >= 7) return theme.danger;
-    if (severity >= 4) return theme.warning;
+    if (severity >= 4) return theme.danger;
+    if (severity >= 3) return theme.warning;
     return theme.success;
   };
 
@@ -184,7 +184,7 @@ export function FoodCard({
                 <Text
                   style={[styles.detailValue, { color: theme.textPrimary }]}
                 >
-                  {food.avgSeverity}/10
+                  {food.avgSeverity}/5
                 </Text>
               </View>
             </View>

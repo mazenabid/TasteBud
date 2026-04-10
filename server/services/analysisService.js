@@ -92,19 +92,6 @@ const extractIngredientReactionStats = async (userId = "69173dd5a3866b85b59d9760
         }
     }
 
-    //console.log("Meals:", meals.length);
-    //console.log("Reactions:", reactions.length);
-    // console.log("Mapped reactions:", Object.keys(reactionMap).length);
-    //console.log("Extracted ingredient stats:", JSON.stringify(ingredientStats, null, 2));
-    for (const id in ingredientStats) {
-        const stat = ingredientStats[id];
-        const reactionMeals = stat.totalMeals - stat.safeMeals;
-
-        //console.log(
-        //    `Ingredient: ${stat.ingredientName}, Total Meals: ${stat.totalMeals}, Meals with Reactions: ${reactionMeals}`
-        //);
-    }
-
     return ingredientStats;
 
 };
@@ -155,11 +142,8 @@ const testAllergenDetection = async (userId) => {
 const getSuspectedFoods = async (userId) => {
     const meals = await MealLog.find({ userId }).sort({ createdAt: 1 }).lean();
     if (meals.length < 3) {
-        //console.log("Not enough meals for analysis");
         return [];
     }
-
-    //console.log("Starting suspected food detection for user:", userId);
 
     const ingredientStats = await extractIngredientReactionStats(userId);
     const symptomMap = await buildSymptomMap();
@@ -175,7 +159,6 @@ const getSuspectedFoods = async (userId) => {
 
     const suspectedFoods = [...igEResults, ...filteredFodmap, ...filteredIntolerance];
     await syncSuspectedToUnsafeFoods(userId, suspectedFoods);
-    //console.log(suspectedFoods)
     return suspectedFoods;
 };
 
@@ -200,7 +183,6 @@ async function syncSuspectedToUnsafeFoods(userId, suspectedFoods) {
                     preExisting: false,
                 });
                 hasChanges = true;
-                //console.log(`Added: ${suspect.ingredientName} (${suspect.track})`);
             }
         }
 

@@ -6,10 +6,9 @@ const detectIntolerancePatterns = (ingredientStats, symptomMap, minAppearances =
     for (const [ingredientId, stats] of Object.entries(ingredientStats)) {
         if (stats.totalMeals < minAppearances) continue;
 
-        const isFODMAPTagged =
-            stats.intoleranceTypes && stats.intoleranceTypes.includes("FODMAP");
-
-        if (isFODMAPTagged) continue;
+        // Removed: isFODMAPTagged skip
+        // The symptom reactionType filter below handles track separation naturally.
+        // If symptoms are typed "intolerance", they belong here regardless of ingredient tags.
 
         const intoleranceEvents = stats.events.filter((e) => {
             const timeScore = getTimeWindowScore(e.hoursAfterMeal, "intolerance");
@@ -20,8 +19,6 @@ const detectIntolerancePatterns = (ingredientStats, symptomMap, minAppearances =
             });
 
             return timeScore >= 0.3 && hasIntoleranceymptom;
-
-
         });
 
         if (intoleranceEvents.length < 2) continue;
@@ -49,7 +46,7 @@ const detectIntolerancePatterns = (ingredientStats, symptomMap, minAppearances =
             id: stats.ingredientId,
             ingredientName: stats.ingredientName,
             track: "intolerance",
-            trackLabel: "⏰ Delayed Intolerance",
+            trackLabel: "Delayed Intolerance",
             confidence: isProbable ? "high" : "moderate",
             totalMeals: stats.totalMeals,
             reactionMeals: concordant,

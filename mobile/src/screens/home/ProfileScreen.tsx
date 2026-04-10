@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,11 +11,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../theme/ThemeContext";
 import { useAuth } from "../../hooks/useAuth";
 import { useMonthlyReport } from "../../hooks/useMonthlyReport";
 import { ExportInfo } from "../../components/modals/ExportInfo";
+import api from "../../services/apiClient";
 
 interface ProfileScreenProps {
   onBack: () => void;
@@ -32,14 +32,38 @@ export function ProfileScreen({
 }: ProfileScreenProps) {
   const { theme, isDark, mode, setMode } = useTheme();
   const { user } = useAuth();
-  const [profile] = useState({
-    name: `${user.firstName} ${user.lastName}`,
-    email: user.email,
-    allergies: ["Peanuts", "Shellfish", "Dairy"],
-    memberSince: "2024-01-15",
-    totalMeals: 247,
-    symptomFreeDays: 45,
-  });
+  const [totalMeals, setTotalMeals] = useState(0);
+  const [symptomFreeDays, setSymptomFreeDays] = useState(0);
+  const memberSince = user?.dateJoined || user?.createdAt || "2025-12-15";
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get("/meallogs/get/");
+        const meals = res.data?.data || res.data || [];
+        setTotalMeals(meals.length);
+        const dayMap: Record<string, { meals: number; reactions: number }> = {};
+        meals.forEach((m: any) => {
+          const day = new Date(m.createdAt).toISOString().split("T")[0];
+          if (!dayMap[day]) dayMap[day] = { meals: 0, reactions: 0 };
+          dayMap[day].meals++;
+          if (m.hadReaction) dayMap[day].reactions++;
+        });
+        const safeDays = Object.values(dayMap).filter(
+          (d) => d.meals > 0 && d.reactions === 0
+        ).length;
+        setSymptomFreeDays(safeDays);
+      } catch (err) {
+        console.error("Failed to fetch profile stats:", err);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const profile = {
+    name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "User",
+    email: user?.email || "",
+    allergies: user?.selfDeclared || [],
+  };
 
   const [notifications, setNotifications] = useState({
     mealReminders: true,
@@ -135,7 +159,7 @@ export function ProfileScreen({
               <Text
                 style={[styles.quickStatValue, { color: theme.textPrimary }]}
               >
-                {profile.totalMeals}
+                {totalMeals}
               </Text>
               <Text
                 style={[styles.quickStatLabel, { color: theme.textSecondary }]}
@@ -143,26 +167,11 @@ export function ProfileScreen({
                 meals logged
               </Text>
             </View>
-            <View
-              style={[
-                styles.quickStatDivider,
-                { backgroundColor: theme.border },
-              ]}
-            />
-            <View style={styles.quickStat}>
-              <Text style={[styles.quickStatValue, { color: theme.success }]}>
-                {profile.symptomFreeDays}
-              </Text>
-              <Text
-                style={[styles.quickStatLabel, { color: theme.textSecondary }]}
-              >
-                symptom-free days
-              </Text>
-            </View>
           </View>
-        </View>
+       </View>
 
-        {/* Your Allergies */}
+
+        {/* Your Allergies
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
@@ -202,7 +211,7 @@ export function ProfileScreen({
               </View>
             ))}
           </View>
-        </View>
+        </View> */}
 
         {/* Notifications */}
         <View style={styles.section}>
@@ -469,7 +478,7 @@ export function ProfileScreen({
           </Text>
           <Text style={[styles.footerText, { color: theme.textTertiary }]}>
             Member since{" "}
-            {new Date(profile.memberSince).toLocaleDateString("en-US", {
+            {new Date(memberSince).toLocaleDateString("en-US", {
               month: "long",
               year: "numeric",
             })}

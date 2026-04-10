@@ -32,7 +32,7 @@ const detectIgEAllergies = (ingredientStats, symptomMap, minAppearances = 2) => 
         if (allergenicEvents.length === 0) continue;
 
         const totalSeverity = allergenicEvents.reduce((sum, e) => {
-            return sum + e.allergicSymptoms.reduce((s, sym) => s + sym.severity, 0);
+            return sum + Math.max(...e.allergicSymptoms.map(sym => sym.severity));
         }, 0);
 
         const avgSeverity = totalSeverity / allergenicEvents.length;
@@ -50,17 +50,28 @@ const detectIgEAllergies = (ingredientStats, symptomMap, minAppearances = 2) => 
 
         const reactionRate = weightedReactions / stats.totalMeals;
 
+        // Check for multi-system involvement (Dribin Grade 3+)
+        // If symptoms span 2+ body systems, it's a stronger IgE signal
+        const bodySystemsInvolved = new Set();
+        allergenicEvents.forEach(e => {
+            e.allergicSymptoms.forEach(sym => {
+                const info = symptomMap[sym.id?.toString()];
+                if (info?.category) bodySystemsInvolved.add(info.category);
+            });
+        });
+        const isMultiSystem = bodySystemsInvolved.size >= 2;
+
         let confidence;
 
-        if (stats.totalMeals < 5) {
-            confidence = "low";
-        } else {
+        if (stats.totalMeals >= 5) {
             confidence =
-                reactionRate > 0.7
-                    ? "very_high"
-                    : reactionRate > 0.5
-                        ? "high"
-                        : "moderate";
+                reactionRate > 0.7 ? "very_high"
+                : reactionRate > 0.5 ? "high"
+                : "moderate";
+        } else if (stats.totalMeals >= 3) {
+            confidence = isMultiSystem ? "high" : "moderate";
+        } else {
+            confidence = isMultiSystem ? "moderate" : "low";
         }
 
         results.push({
@@ -74,7 +85,8 @@ const detectIgEAllergies = (ingredientStats, symptomMap, minAppearances = 2) => 
             nonReactionMeals: stats.safeMeals,
             reactionRate: Math.round(reactionRate * 100),
             avgSeverity: Math.round(avgSeverity * 10) / 10,
-            avgHoursToReaction: Math.round(avgHours * 10) / 10
+            avgHoursToReaction: Math.round(avgHours * 10) / 10,
+            isMultiSystem
         });
     }
 
